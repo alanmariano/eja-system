@@ -1,0 +1,5 @@
+@font-face {  
+    font-family: "Beautiful Script";  
+    src: url(/fonts/font.eot ); /* IE */  
+    src: local("Beautiful Script"), url("fonts/Beautiful Script.TTF") format("truetype"); /*non-IE*/  
+}
