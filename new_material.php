@@ -96,21 +96,21 @@
                     <div class="card-body card-block">
                         <form action="" method="post" onSubmit="submitForm();return false;" enctype="multipart/form-data" id="new-material-form" class="form-horizontal">
                             <div class="row form-group">
-                                <div class="col col-md-3"><label for="text-input" class=" form-control-label">Título</label></div>
-                                <div class="col-12 col-md-9"><input type="text" id="text-input" name="text-input" placeholder="Título" class="form-control"><small class="form-text text-muted">Insira o título de seu material</small></div>
+                                <div class="col col-md-3"><label for="title" class=" form-control-label">Título</label></div>
+                                <div class="col-12 col-md-9"><input type="text" id="title" name="title" placeholder="Título" class="form-control"><small class="form-text text-muted">Insira o título de seu material</small></div>
                             </div>
                             <div class="row form-group">
                             <div class="col col-md-3"><label class=" form-control-label">Material privado</label></div>
                             <div class="col col-md-9">
                               <div class="form-check">
                                 <div class="radio">
-                                  <label for="radio1" class="form-check-label ">
-                                    <input type="radio" id="radio1" name="radios" value="option1" class="form-check-input">Sim
+                                  <label for="radioSim" class="form-check-label ">
+                                    <input type="radio" id="radioSim" name="privacy" value="1" class="form-check-input">Sim
                                   </label>
                                 </div>
                                 <div class="radio">
-                                  <label for="radio2" class="form-check-label ">
-                                    <input type="radio" id="radio2" checked="true" name="radios" value="option2" class="form-check-input">Não
+                                  <label for="radioNao" class="form-check-label ">
+                                    <input type="radio" id="radioNao" checked="true" name="privacy" value="0" class="form-check-input">Não
                                   </label>
                                 </div>
                               </div>
@@ -169,12 +169,12 @@
 
     <script>
 
-        function ajax_handler(func){
+        function ajax_handler(func, json){
             var xhttp = new XMLHttpRequest();
             try{
                 xhttp.open("POST", "ajax_handler.php", true);
-                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                xhttp.send("tipo=1&message=oieee");
+                xhttp.setRequestHeader("Content-type", "application/json");
+                xhttp.send(json);
             }catch(err){
                 alert("couldnt complete request. Is JS enabled for that domain?\\n\\n" + err.message);
                 return false;
@@ -190,9 +190,26 @@
         }
         
         function submitForm() {
+            var tags = document.getElementsByClassName("select2-selection__choice");
+            var array_tags = [];
+            for(var i=0; i< tags.length; i++){
+                array_tags[i] = tags[i].title;
+            }
+
+            var data = {
+                func: "new_material",
+                title: document.getElementById("title").value,
+                privacy: document.querySelector('input[name="privacy"]:checked').value,
+                tags: array_tags,
+                content: CKEDITOR.instances.editor.getData()
+            };
+
+            var json = JSON.stringify(data);
+
+
             ajax_handler(function(teste){
-                alert(teste);
-            } );
+                console.log(teste);
+            }, json );
             
         }
 
