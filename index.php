@@ -1,3 +1,13 @@
+<?php
+
+    //require_once (__DIR__ . "/vendor/autoload.php");
+    require_once (__DIR__ . "/db/db_handler.php");
+    $db = new DB_Handler();
+    $materials = $db->get_my_materials();
+
+    
+?>
+
 <!doctype html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
@@ -5,6 +15,7 @@
 <!--[if gt IE 8]><!-->
 <html class="no-js" lang="">
 <!--<![endif]-->
+
 
 <head>
     <meta charset="utf-8">
@@ -34,7 +45,11 @@
 
     <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script> -->
 
-
+    <style>
+        .title_links{
+            color: #000;
+        }
+    </style>
 </head>
 
 <body>
@@ -89,6 +104,40 @@
 
 
             <div class="col-sm-12 col-md-12 col-lg-12">
+            
+
+            
+                        
+                <?php
+                    if(is_object($materials)){
+                        foreach($materials as $m){
+
+                ?>
+
+                    <div class="card">
+                                <div class="card-header">
+                                    <strong class="card-title"><a class="title_links" href="edit_material.php?o=1&i=<?php echo $m->_id; ?>" > <?php echo $m->titulo ?></a>
+                                        <small>
+                                            <?php if($m->privacidade == '0'){ ?>
+                                                <span class="badge badge-success float-right mt-1">Público</span>
+                                            <?php }else{ ?>
+                                                <span class="badge badge-dark float-right mt-1">Privado</span>
+                                            <?php } ?>
+                                        </small>
+                                    </strong>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"><?php echo $m->conteudo ?></p>
+                                </div>
+                    </div>
+
+                <?php
+                        }
+                    }else{
+                        echo $materials;
+                    }
+                
+                ?>
                 
             </div>
             <!--/.col-->
@@ -118,6 +167,10 @@
     <script src="assets/js/select2.min.js"></script>   
 
     <script>
+
+
+
+
         ( function ( $ ) {
             "use strict";
 

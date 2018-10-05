@@ -1,10 +1,10 @@
 <?php
 
-//include "../globals.php";
-require_once __DIR__ . "/../vendor/autoload.php"; 
+
 
     class Material{
 
+        private $oid;
         private $title;
         private $content;
         private $privacy;
@@ -12,7 +12,8 @@ require_once __DIR__ . "/../vendor/autoload.php";
         private $author;
 
         //Constructor
-        public function __construct($title, $content, $privacy, $tags, $author){
+        public function __construct($oid, $title, $content, $privacy, $tags, $author){
+            $this->setOid($oid);
             $this->setTitle($title);
             $this->setContent($content);
             $this->setPrivacy($privacy);
@@ -21,6 +22,10 @@ require_once __DIR__ . "/../vendor/autoload.php";
         }
 
         //Getters
+        function getOid(){
+            return $this->oid;
+        }
+
         function getTitle(){
             return $this->title;
         }
@@ -42,6 +47,10 @@ require_once __DIR__ . "/../vendor/autoload.php";
         }
 
         //Setters
+        function setOid($oid){
+            $this->oid = $oid;
+        }
+        
         function setTitle($title){
             $this->title = $title;
         }
@@ -62,33 +71,7 @@ require_once __DIR__ . "/../vendor/autoload.php";
             $this->author = $author;
         }
 
-        //CRUD functions
-        function new(){
-
-            $user = "admin";
-            $pwd = "pass123ASSFv";
-            try{
-                $client = new MongoDB\Client("mongodb://${user}:${pwd}@127.0.0.1:27017");
-                $collection = $client->project_db->materiais_didaticos;
-
-                $insertOneResult = $collection->insertOne([
-                    'titulo' => $this->getTitle(),
-                    'privacidade' => $this->getPrivacy(),
-                    'conteudo' => $this->getContent(),
-                    'autor' => $this->getAuthor()
-                ]);
-
-                if($insertOneResult->getInsertedCount()>0){
-                    return 'ok';
-                }else{
-                    return 'erro ao inserir';
-                }
-
-            }catch(Exception $e){
-                return $e->getMessage();
-            }
-            
-        }
+        
 
     }
 

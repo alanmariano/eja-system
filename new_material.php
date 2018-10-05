@@ -184,7 +184,6 @@
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     func(this.responseText);
-                    //document.getElementById("demo").innerHTML = this.responseText;
                 }
             };
         }
@@ -206,8 +205,10 @@
 
             var json = JSON.stringify(data);
 
+            console.log(json);  
 
             ajax_handler(function(teste){
+                alert("Deu certo");
                 console.log(teste);
             }, json );
             
