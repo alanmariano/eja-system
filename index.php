@@ -114,21 +114,35 @@
 
                 ?>
 
-                    <div class="card">
-                                <div class="card-header">
-                                    <strong class="card-title"><a class="title_links" href="edit_material.php?o=1&i=<?php echo $m->_id; ?>" > <?php echo $m->titulo ?></a>
-                                        <small>
-                                            <?php if($m->privacidade == '0'){ ?>
-                                                <span class="badge badge-success float-right mt-1">Público</span>
-                                            <?php }else{ ?>
-                                                <span class="badge badge-dark float-right mt-1">Privado</span>
-                                            <?php } ?>
-                                        </small>
-                                    </strong>
+                    <div class="card" data-id="<?php $m->_id; ?>">
+                        <div class="card-header">
+                            <strong class="card-title"><a class="title_links" href="view_material.php?o=1&i=<?php echo $m->_id; ?>" > <?php echo $m->titulo ?></a>
+                                <small>
+                                    <?php if($m->privacidade == '0'){ ?>
+                                        <span class="badge badge-success float-right mt-1">Público</span>
+                                    <?php }else{ ?>
+                                        <span class="badge badge-dark float-right mt-1">Privado</span>
+                                    <?php } ?>
+                                </small>
+                            </strong>                                    
+                        </div>
+                        <div class="card-body">
+                            <div class="row no-gutters">
+                                <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <strong>Tags: </strong>
+                                    <?php foreach($m->tags as $tag){ ?> 
+                                        <span class="badge badge-secondary"><?php echo $tag;?></span>
+                                    <?php } ?>
                                 </div>
-                                <div class="card-body">
-                                    <p class="card-text"><?php echo $m->conteudo ?></p>
+                            </div>
+                            <div class="row no-gutters">
+                                <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <button type="button" data-id="<?php $m->_id; ?>" class="btn btn-danger btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Deletar</button>
+                                    <a href="edit_material.php?o=1&i=<?php echo $m->_id; ?>"><button type="button" data-id="<?php $m->_id; ?>" class="btn btn-primary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Editar</button></a>
+                                    <a href="view_material.php?o=1&i=<?php echo $m->_id; ?>"><button type="button" data-id="<?php $m->_id; ?>" class="btn btn-secondary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Visualizar</button></a>    
                                 </div>
+                            </div>
+                        </div>
                     </div>
 
                 <?php
