@@ -1,6 +1,5 @@
 <?php
 
-    //require_once (__DIR__ . "/vendor/autoload.php");
     require_once (__DIR__ . "/db/db_handler.php");
     $db = new DB_Handler();
     $materials = $db->get_my_materials();
@@ -18,33 +17,9 @@
 
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>TCC Alan</title>
-    <meta name="description" content="TCC Alan">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="apple-touch-icon" href="apple-icon.png">
-    <link rel="shortcut icon" href="favicon.ico">
-
-
-
-
-    <link rel="stylesheet" href="assets/css/normalize.css">
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
-    <link rel="stylesheet" href="assets/css/themify-icons.css">
-    <link rel="stylesheet" href="assets/css/flag-icon.min.css">
-    <link rel="stylesheet" href="assets/css/cs-skin-elastic.css">
-    <!-- <link rel="stylesheet" href="assets/css/bootstrap-select.less"> -->
-    <link rel="stylesheet" href="assets/scss/style.css">    
-    <link rel="stylesheet" href="assets/css/select2.min.css">  
-    <link href="assets/css/lib/vector-map/jqvmap.min.css" rel="stylesheet">
-
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
-
-    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script> -->
-
+    <?php require_once ("head.php"); ?>
+    
     <style>
         .title_links{
             color: #000;
@@ -97,17 +72,8 @@
             </div>
 
 
-
-
-
-
-
-
             <div class="col-sm-12 col-md-12 col-lg-12">
-            
-
-            
-                        
+         
                 <?php
                     if(is_object($materials)){
                         foreach($materials as $m){
@@ -138,7 +104,7 @@
                             <div class="row no-gutters">
                                 <div class="col-sm-12 col-md-12 col-lg-12">
                                     <button type="button" data-id="<?php $m->_id; ?>" class="btn btn-danger btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Deletar</button>
-                                    <a href="edit_material.php?o=1&i=<?php echo $m->_id; ?>"><button type="button" data-id="<?php $m->_id; ?>" class="btn btn-primary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Editar</button></a>
+                                    <button type="button" onclick="edit_material(1,'<?php echo $m->_id; ?>');" class="btn btn-primary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Editar</button>
                                     <a href="view_material.php?o=1&i=<?php echo $m->_id; ?>"><button type="button" data-id="<?php $m->_id; ?>" class="btn btn-secondary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Visualizar</button></a>    
                                 </div>
                             </div>
@@ -156,12 +122,6 @@
             </div>
             <!--/.col-->
 
-
-
-
-
-
-
         </div>
         <!-- .content -->
     </div>
@@ -169,18 +129,20 @@
 
     <!-- Right Panel -->
 
-    <script src="assets/js/vendor/jquery-2.1.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
-    <script src="assets/js/plugins.js"></script>
-    <script src="assets/js/main.js"></script>
-
-
-    <script src="assets/js/dashboard.js"></script>
-    <script src="assets/js/widgets.js"></script>
-    <script src="plugins/ckeditor4/ckeditor.js"></script> 
-    <script src="assets/js/select2.min.js"></script>   
+    <?php require_once("js.php"); ?>
 
     <script>
+
+        function edit_material(o, i){
+            sessionStorage.setItem("o",o);
+            sessionStorage.setItem("i",i);
+            document.location.href = 'edit_material.php';
+        }
+        
+        
+           
+        
+        
 
 
 

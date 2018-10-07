@@ -7,34 +7,7 @@
 <!--<![endif]-->
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>TCC Alan</title>
-    <meta name="description" content="TCC Alan">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link rel="apple-touch-icon" href="apple-icon.png">
-    <link rel="shortcut icon" href="favicon.ico">
-
-
-
-
-    <link rel="stylesheet" href="assets/css/normalize.css">
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
-    <link rel="stylesheet" href="assets/css/themify-icons.css">
-    <link rel="stylesheet" href="assets/css/flag-icon.min.css">
-    <link rel="stylesheet" href="assets/css/cs-skin-elastic.css">
-    <!-- <link rel="stylesheet" href="assets/css/bootstrap-select.less"> -->
-    <link rel="stylesheet" href="assets/scss/style.css">    
-    <link rel="stylesheet" href="assets/css/select2.min.css">  
-    <link href="assets/css/lib/vector-map/jqvmap.min.css" rel="stylesheet">
-
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
-
-    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script> -->
-
-
+    <?php require_once ("head.php"); ?>
 </head>
 
 <body>
@@ -81,13 +54,6 @@
                 </div>-->
             </div>
 
-
-
-
-
-
-
-
             <div class="col-sm-12 col-md-12 col-lg-12">
                 <div class="card">
                     <div class="card-header">
@@ -119,9 +85,7 @@
                             <div class="row form-group">
                                 <div class="col col-md-3"><label for="textarea-input" class=" form-control-label">Tags</label></div>
                                 <div class="col-12 col-md-9">
-                                <select data-placeholder="Classifique seu material" id="select-tags" class="form-control js-example-tags" multiple="multiple">
-                                    
-                                </select>
+                                    <input type="text" id="select-tags"/>
                                 </div>
                             </div>
                             <div class="row form-group">
@@ -144,28 +108,13 @@
             <!--/.col-->
 
 
-
-
-
-
-
         </div>
         <!-- .content -->
     </div>
     <!-- /#right-panel -->
 
     <!-- Right Panel -->
-
-    <script src="assets/js/vendor/jquery-2.1.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
-    <script src="assets/js/plugins.js"></script>
-    <script src="assets/js/main.js"></script>
-
-
-    <script src="assets/js/dashboard.js"></script>
-    <script src="assets/js/widgets.js"></script>
-    <script src="plugins/ckeditor4/ckeditor.js"></script> 
-    <script src="assets/js/select2.min.js"></script>   
+    <?php require_once("js.php"); ?>
 
     <script>
 
@@ -187,12 +136,13 @@
                 }
             };
         }
-        
+
         function submitForm() {
-            var tags = document.getElementsByClassName("select2-selection__choice");
+            var tags = document.getElementsByClassName("selectize-input")[0].children;
             var array_tags = [];
             for(var i=0; i< tags.length; i++){
-                array_tags[i] = tags[i].title;
+                if(tags[i].dataset.value != null)
+                    array_tags[i] = tags[i].dataset.value;
             }
 
             var data = {
@@ -207,26 +157,39 @@
 
             console.log(json);  
 
-            ajax_handler(function(teste){
+            ajax_handler(function(message){
                 alert("Deu certo");
-                console.log(teste);
+                console.log(message);
             }, json );
             
         }
+        
+        
 
         ( function ( $ ) {
             "use strict";
 
-          
+            
            
             $(document).ready(function() {
                 CKEDITOR.replace( 'editor' );
 
-                $(".js-example-tags").select2({
-                    
-                    placeholder: 'Classifique seu material',
-                    tags: true
+                $('#select-tags').selectize({
+                    delimiter: ',',
+                    persist: false,
+                    create: function(input) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    },
+                    render: {
+                        option_create: function (data, escape) {
+                            return '<div class="create">Adicionar <strong>' + escape(data.input) + '</strong>&hellip;</div>';
+                        }
+                    }
                 });
+
             });
            
         } )( jQuery );
