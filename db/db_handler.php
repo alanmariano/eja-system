@@ -11,9 +11,11 @@ class DB_Handler{
 
     private $client;
     public $database;   
+    public $author;
 
     public function __construct(){
         $this->database = "project_db";
+        $this->author = "5bac156c3ed8327ae72f2aa7";
         $user = "admin";
         $pwd = "pass123ASSFv";
         $this->client = new MongoDB\Client("mongodb://${user}:${pwd}@127.0.0.1:27017");        
@@ -21,7 +23,9 @@ class DB_Handler{
 
 
     //CRUD functions
+    ////////////////////////NEW
     function new_material($material){    
+
         try{
             $db = $this->database;
             $collection = $this->client->$db->materiais_didaticos;
@@ -47,7 +51,10 @@ class DB_Handler{
         }    
     }
 
+
+    ////////////////////EDIT
     function edit_material($material){    
+
         try{
             $db = $this->database;
             $collection = $this->client->$db->materiais_didaticos;
@@ -90,11 +97,42 @@ class DB_Handler{
         }    
     }
 
-    function get_my_materials(){
+    ///////////////////////DELETE
+    function delete_materials($materials){
+
         try{
             $db = $this->database;
             $collection = $this->client->$db->materiais_didaticos;
-            $oid = new MongoDB\BSON\ObjectId("5bac156c3ed8327ae72f2aa7");
+
+            foreach($materials as $material){
+                $deleted = $collection->deleteOne(
+                    [
+                        "_id" => $material->getOid(),
+                        "autor" => $material->getAuthor()
+                    ]
+                );
+    
+                if($deleted->getDeletedCount()==1){
+                    continue;
+                }else if($deleted->getDeletedCount()==0){
+                    return "Erro ao deletar o material ".$material->getOid().". Material não existe ou você não é o autor.";
+                }
+            }
+
+            return "ok";
+
+        }catch(Exception $e){
+            return $e->getMessage();
+        }
+
+    }
+
+    function get_user_materials(){
+
+        try{
+            $db = $this->database;
+            $collection = $this->client->$db->materiais_didaticos;
+            $oid = new MongoDB\BSON\ObjectId("$this->author");
 
             $cursor = $collection->find(
                 [
@@ -113,9 +151,11 @@ class DB_Handler{
         }catch(Exception $e){
             return $e->getMessage();
         }    
+
     }
 
     function get_materials($query, $single = true,  $options = array()){
+
         try{
             $db = $this->database;
             $collection = $this->client->$db->materiais_didaticos;
@@ -160,13 +200,12 @@ class DB_Handler{
 
             }
             
-            
-
         }catch(Exception $e){
             return $e->getMessage();
         }   
         
     }
+
 }
 
 ?>

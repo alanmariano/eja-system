@@ -6,17 +6,29 @@
     
     $rawdata = file_get_contents('php://input');
     $data = json_decode($rawdata);
+
+    $author = "5bac156c3ed8327ae72f2aa7";
     
     if($data->func == "new_material"){
-        $material = new Material(null, $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("5bac156c3ed8327ae72f2aa7"));
+        $material = new Material(null, $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("$author"));
         $db = new DB_Handler();
         echo $db->new_material($material);
     }
 
     if($data->func == "edit_material"){
-        $material = new Material(new MongoDB\BSON\ObjectId("$data->oid"), $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("5bac156c3ed8327ae72f2aa7"));
+        $material = new Material(new MongoDB\BSON\ObjectId("$data->oid"), $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("$author"));
         $db = new DB_Handler();
         echo $db->edit_material($material);
+    }
+
+    if($data->func == "delete_materials"){
+        $materials = array();
+        foreach($data->oids as $oid){
+            $materials[] = new Material(new MongoDB\BSON\ObjectId("$oid"), null, null, null, null, new MongoDB\BSON\ObjectId("$author"));
+        }
+        $db = new DB_Handler();
+        echo $db->delete_materials($materials);
+
     }
 
     if($data->func == "get_material"){

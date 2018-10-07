@@ -118,24 +118,6 @@
 
     <script>
 
-        function ajax_handler(func, json){
-            var xhttp = new XMLHttpRequest();
-            try{
-                xhttp.open("POST", "ajax_handler.php", true);
-                xhttp.setRequestHeader("Content-type", "application/json");
-                xhttp.send(json);
-            }catch(err){
-                alert("couldnt complete request. Is JS enabled for that domain?\\n\\n" + err.message);
-                return false;
-            }
-            
-
-            xhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    func(this.responseText);
-                }
-            };
-        }
 
         function submitForm() {
             var tags = document.getElementsByClassName("selectize-input")[0].children;
