@@ -130,7 +130,7 @@
                                 <div class="col-sm-12 col-md-12 col-lg-12">
                                     <button type="button" data-toggle="modal" data-target="#smallmodal" onclick="delete_material(1,'<?php echo $m->_id; ?>','<?php echo $m->titulo ?>');" class="btn btn-danger btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Deletar</button>
                                     <button type="button" onclick="edit_material(1,'<?php echo $m->_id; ?>');" class="btn btn-primary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Editar</button>
-                                    <a href="view_material.php?o=1&i=<?php echo $m->_id; ?>"><button type="button" data-id="<?php $m->_id; ?>" class="btn btn-secondary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Visualizar</button></a>    
+                                    <button type="button" onclick="view_material(1,'<?php echo $m->_id; ?>');" class="btn btn-secondary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Visualizar</button>    
                                 </div>
                             </div>
                         </div>
@@ -164,6 +164,13 @@
             sessionStorage.setItem("o",o);
             sessionStorage.setItem("i",i);
             document.location.href = 'edit_material.php';
+        }
+
+
+        function view_material(o, i){
+            sessionStorage.setItem("o",o);
+            sessionStorage.setItem("i",i);
+            window.open('view_material.php', '_blank');
         }
 
         function delete_material(o, i, t){

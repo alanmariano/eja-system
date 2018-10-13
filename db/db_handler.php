@@ -41,13 +41,29 @@ class DB_Handler{
             );
 
             if($insertOneResult->getInsertedCount()>0){
-                return 'ok';
+
+                $inserteId = $insertOneResult->getInsertedId();
+                
+                $collection = $this->client->$db->tags_materiais;
+
+                foreach($material->getTags() as $tag){
+                    try{
+                        $updateResult = $collection->updateOne(
+                            [ 'titulo' => $tag ],
+                            [ '$addToSet' => [ 'materiais' => $inserteId ]],
+                            [ 'upsert' => true]
+                        );
+                    }catch(Exception $e){
+                        return "Erro ao inserir tags. Erro: ".$e->getMessage();
+                    }
+                }                
+                return 'Inserido com sucesso';
             }else{
-                return 'erro ao inserir';
+                return 'Material não foi inserido';
             }
 
         }catch(Exception $e){
-            return $e->getMessage();
+            return "Erro ao inserir material. Erro: ".$e->getMessage();
         }    
     }
 
@@ -84,7 +100,7 @@ class DB_Handler{
                 );
     
                 if($updated != null){
-                    return 'ok';
+                    return 'Editado com sucesso';
                 }else{
                     return 'erro ao inserir';
                 }
@@ -119,7 +135,7 @@ class DB_Handler{
                 }
             }
 
-            return "ok";
+            return "Deletado com sucesso";
 
         }catch(Exception $e){
             return $e->getMessage();
@@ -204,6 +220,52 @@ class DB_Handler{
             return $e->getMessage();
         }   
         
+    }
+
+    function search_materials($query, $options = array()){
+        
+        try{
+
+            $db = $this->database;
+            $collection = $this->client->$db->tags_materiais;
+
+            $document = $collection->findOne(
+                $query
+            );
+            
+            if($document == null){
+                return "Tag não encontrada";
+            }
+
+            $collection = $this->client->$db->materiais_didaticos;
+
+            $cursor = $collection->find(
+                [ 
+                    "_id" => [ '$in' => $document->materiais],
+                    "privacidade" => "0"
+                ],
+                $options
+            );
+
+            foreach($cursor as $c){
+
+                $response[] = array(
+                    "oid"           =>  $c->_id->__toString(),
+                    "titulo"        =>  $c->titulo,
+                    "conteudo"      =>  $c->conteudo,
+                    "tags"          =>  $c->tags,
+                    "autor"         =>  $c->autor->__toString(),
+                    "privacidade"   =>  $c->privacidade
+                ); 
+                
+            }
+
+            return $response;
+            
+            
+        }catch(Exception $e){
+            return $e->getMessage();
+        }   
     }
 
 }

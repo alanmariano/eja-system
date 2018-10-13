@@ -7,8 +7,9 @@
     $rawdata = file_get_contents('php://input');
     $data = json_decode($rawdata);
 
-    $author = "5bac156c3ed8327ae72f2aa7";
-    
+    $author = "5bac156c3ed8327ae72f2aa7"; //admin
+    //$author = "5bac156c3ed8327ae72f2ab7"; //user fake para testes
+
     if($data->func == "new_material"){
         $material = new Material(null, $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("$author"));
         $db = new DB_Handler();

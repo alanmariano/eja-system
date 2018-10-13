@@ -117,7 +117,8 @@
 
     <script>
 
-        
+        var owner;
+        var id;
         
         function submitForm() {
             var tags = document.getElementsByClassName("selectize-input")[0].children;
@@ -126,20 +127,32 @@
                 if(tags[i].dataset.value != null)
                     array_tags[i] = tags[i].dataset.value;
             }
+            
+            var data;
 
-            var data = {
-                func: "edit_material",
-                oid: sessionStorage.getItem("i"),
-                title: document.getElementById("title").value,
-                privacy: document.querySelector('input[name="privacy"]:checked').value,
-                tags: array_tags,
-                content: CKEDITOR.instances.editor.getData()
-            };
+            if(owner == 1){
+                data = {
+                    func: "edit_material",
+                    oid: sessionStorage.getItem("i"),
+                    title: document.getElementById("title").value,
+                    privacy: document.querySelector('input[name="privacy"]:checked').value,
+                    tags: array_tags,
+                    content: CKEDITOR.instances.editor.getData()
+                };
+            }else{
+                data = {
+                    func: "new_material",
+                    title: document.getElementById("title").value,
+                    privacy: document.querySelector('input[name="privacy"]:checked').value,
+                    tags: array_tags,
+                    content: CKEDITOR.instances.editor.getData()
+                };
+            }
 
             var json = JSON.stringify(data);
 
             ajax_handler(function(message){
-                alert("Deu certo");
+                alert(message);
                 console.log(message);
             }, json );
             
@@ -153,8 +166,8 @@
 
             //init function makes ajax call to fill form fields
             function init(){
-                var owner = sessionStorage.getItem("o");
-                var id = sessionStorage.getItem("i");
+                owner = sessionStorage.getItem("o");
+                id = sessionStorage.getItem("i");
 
                 console.log(id);
 
