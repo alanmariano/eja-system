@@ -13,13 +13,13 @@
     if($data->func == "new_material"){
         $material = new Material(null, $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("$author"));
         $db = new DB_Handler();
-        echo $db->new_material($material);
+        echo json_encode($db->new_material($material));
     }
 
     if($data->func == "edit_material"){
         $material = new Material(new MongoDB\BSON\ObjectId("$data->oid"), $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("$author"));
         $db = new DB_Handler();
-        echo $db->edit_material($material);
+        echo json_encode($db->edit_material($material));
     }
 
     if($data->func == "delete_materials"){
@@ -28,7 +28,7 @@
             $materials[] = new Material(new MongoDB\BSON\ObjectId("$oid"), null, null, null, null, new MongoDB\BSON\ObjectId("$author"));
         }
         $db = new DB_Handler();
-        echo $db->delete_materials($materials);
+        echo json_encode($db->delete_materials($materials));
 
     }
 

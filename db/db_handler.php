@@ -54,16 +54,16 @@ class DB_Handler{
                             [ 'upsert' => true]
                         );
                     }catch(Exception $e){
-                        return "Erro ao inserir tags. Erro: ".$e->getMessage();
+                        return array("status" => "error", "message" => "Erro ao inserir tags. Erro: ".$e->getMessage());
                     }
                 }                
-                return 'Inserido com sucesso';
+                return array("status" => "ok", "message" => "Inserido com sucesso");
             }else{
-                return 'Material não foi inserido';
+                return array("status" => "error", "message" => "Material não foi inserido");
             }
 
         }catch(Exception $e){
-            return "Erro ao inserir material. Erro: ".$e->getMessage();
+            return array("status" => "error", "message" => "Erro ao inserir material. Erro: ".$e->getMessage());
         }    
     }
 
@@ -82,6 +82,11 @@ class DB_Handler{
             );
 
             if($document->autor->__toString() == $material->getAuthor()->__toString()){
+
+                $deleted = array_diff((array)$document->tags, (array)$material->getTags());
+                $added = array_diff((array)$material->getTags(), (array)$document->tags);
+
+                //return $deleted; 
                 $updated = $collection->findOneAndUpdate(
                     [
                         "_id" => $material->getOid()
@@ -98,14 +103,40 @@ class DB_Handler{
                         'returnDocument' => MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
                     ]
                 );
+
+                $collection = $this->client->$db->tags_materiais;
+
+                foreach($added as $a){
+                    try{
+                        $tagUpdateResult = $collection->updateOne(
+                            [ 'titulo' => $a ],
+                            [ '$addToSet' => [ 'materiais' => $material->getOid() ]],
+                            [ 'upsert' => true]
+                        );
+                    }catch(Exception $e){
+                        return array("status" => "error", "message" => "Erro ao inserir tags. Erro: ".$e->getMessage());
+                    }
+                }
+
+                foreach($deleted as $d){
+                    try{
+                        $tagUpdateResult = $collection->updateOne(
+                            [ 'titulo' => $d ],
+                            [ '$pull' => [ 'materiais' => $material->getOid() ]],
+                            [ 'upsert' => true]
+                        );
+                    }catch(Exception $e){
+                        return array("status" => "error", "message" => "Erro ao remover tags. Erro: ".$e->getMessage());
+                    }
+                }
     
                 if($updated != null){
-                    return 'Editado com sucesso';
+                    return array("status" => "ok", "message" => "Editado com sucesso");
                 }else{
-                    return 'erro ao inserir';
+                    return array("status" => "error", "message" => "erro ao editar");
                 }
             }else{
-                return "Você não é o criador desse documento";
+                return array("status" => "error", "message" => "Você não é o criador desse documento");
             }            
 
         }catch(Exception $e){
@@ -118,27 +149,41 @@ class DB_Handler{
 
         try{
             $db = $this->database;
-            $collection = $this->client->$db->materiais_didaticos;
 
             foreach($materials as $material){
+
+                $collection = $this->client->$db->materiais_didaticos;
                 $deleted = $collection->deleteOne(
                     [
                         "_id" => $material->getOid(),
                         "autor" => $material->getAuthor()
                     ]
                 );
+
+                $collection = $this->client->$db->tags_materiais;
+                
+                try{
+                    $tagUpdateResult = $collection->updateMany(
+                        [ ],
+                        [ '$pull' => [ 'materiais' => $material->getOid() ]],
+                        [ 'upsert' => true]
+                    );
+                }catch(Exception $e){
+                    return array("status" => "error", "message" => "Erro ao remover tags. Erro: ".$e->getMessage());
+                }
+                
     
                 if($deleted->getDeletedCount()==1){
                     continue;
                 }else if($deleted->getDeletedCount()==0){
-                    return "Erro ao deletar o material ".$material->getOid().". Material não existe ou você não é o autor.";
+                    return array("status" => "error", "message" => "Erro ao deletar o material ".$material->getOid().". Material não existe ou você não é o autor.");
                 }
             }
 
-            return "Deletado com sucesso";
+            return array("status" => "ok", "message" => "Deletado com sucesso");
 
         }catch(Exception $e){
-            return $e->getMessage();
+            return array("status" => "error", "message" => $e->getMessage());
         }
 
     }

@@ -139,9 +139,14 @@
 
             console.log(json);  
 
-            ajax_handler(function(message){
-                alert("Deu certo");
-                console.log(message);
+            ajax_handler(function(response){
+                response = JSON.parse(response);
+                if(response.status == "ok"){
+                    alert("Deu certo");
+                }else{
+                    alert(response.message);
+                }
+                console.log(response);
             }, json );
             
         }

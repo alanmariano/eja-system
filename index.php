@@ -189,9 +189,10 @@
 
         function confirm_delete_material(){
             var ids = JSON.parse(json);
-            ajax_handler(function(message){
-                console.log(message);
-                if(message == "ok"){
+            ajax_handler(function(response){
+                response = JSON.parse(response);
+                console.log(response);
+                if(response.status == "ok"){
                     for(var i=0; i<ids.oids.length; i++){
                         document.querySelectorAll("[data-id='"+ids.oids[i]+"']")[0].outerHTML = "";
                     }

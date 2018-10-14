@@ -151,9 +151,14 @@
 
             var json = JSON.stringify(data);
 
-            ajax_handler(function(message){
-                alert(message);
-                console.log(message);
+            ajax_handler(function(response){
+                response = JSON.parse(response);
+                if(response.status == "ok"){
+                    alert("Deu certo");
+                }else{
+                    alert(response.message);
+                }
+                console.log(response);
             }, json );
             
         }
