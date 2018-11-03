@@ -17,7 +17,7 @@
                         <a href="index.php"> <i class="menu-icon fa fa-dashboard"></i>Meus materiais</a>
                     </li>
                     <li>
-                        <a href="new_material.php"> <i class="menu-icon fa fa-dashboard"></i>Novo material</a>
+                        <a href="new_material.php"> <i class="menu-icon fa fa-plus-circle"></i>Novo material</a>
                     </li>
                 </ul>
             </div>

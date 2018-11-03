@@ -48,11 +48,11 @@
             <div class="col-sm-4">
                 <div class="page-header float-left">
                     <div class="page-title">
-                        <h1>Dashboard</h1>
+                        <h1>Meus materiais</h1>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-8">
+            <!--<div class="col-sm-8">
                 <div class="page-header float-right">
                     <div class="page-title">
                         <ol class="breadcrumb text-right">
@@ -60,7 +60,7 @@
                         </ol>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
 
         <div class="content mt-3">
@@ -107,7 +107,7 @@
 
                     <div class="card" data-id="<?php echo $m->_id; ?>">
                         <div class="card-header">
-                            <strong class="card-title"><a class="title_links" href="view_material.php?o=1&i=<?php echo $m->_id; ?>" > <?php echo $m->titulo ?></a>
+                            <strong class="card-title"><a class="title_links" href="#" onclick="view_material(1,'<?php echo $m->_id; ?>');" > <?php echo $m->titulo ?></a>
                                 <small>
                                     <?php if($m->privacidade == '0'){ ?>
                                         <span class="badge badge-success float-right mt-1">Público</span>
@@ -160,6 +160,8 @@
 
         var json;
 
+        var notyf = new Notyf();
+
         function edit_material(o, i){
             sessionStorage.setItem("o",o);
             sessionStorage.setItem("i",i);
@@ -196,6 +198,7 @@
                     for(var i=0; i<ids.oids.length; i++){
                         document.querySelectorAll("[data-id='"+ids.oids[i]+"']")[0].outerHTML = "";
                     }
+                    notyf.confirm('O material foi removido com sucesso!');
                 }                
             }, json );
         }
@@ -204,9 +207,6 @@
 
         ( function ( $ ) {
             "use strict";
-
-           
-           
            
            
         } )( jQuery );

@@ -28,11 +28,11 @@
             <div class="col-sm-4">
                 <div class="page-header float-left">
                     <div class="page-title">
-                        <h1>Dashboard</h1>
+                        <h1>Edição de material</h1>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-8">
+            <!--<div class="col-sm-8">
                 <div class="page-header float-right">
                     <div class="page-title">
                         <ol class="breadcrumb text-right">
@@ -40,7 +40,7 @@
                         </ol>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
 
         <div class="content mt-3">
@@ -60,7 +60,7 @@
                         <strong>Novo</strong> material didático
                     </div>
                     <div class="card-body card-block">
-                        <form action="" method="post" onSubmit="submitForm();return false;" enctype="multipart/form-data" id="new-material-form" class="form-horizontal">
+                        <form action="" method="post" onSubmit="submitForm();return false;" enctype="multipart/form-data" id="edit-material-form" class="form-horizontal">
                             <div class="row form-group">
                                 <div class="col col-md-3"><label for="title" class=" form-control-label">Título</label></div>
                                 <div class="col-12 col-md-9"><input type="text" id="title" name="title" placeholder="Título" class="form-control"><small class="form-text text-muted">Insira o título de seu material</small></div>
@@ -119,6 +119,7 @@
 
         var owner;
         var id;
+        var notyf = new Notyf();
         
         function submitForm() {
             var tags = document.getElementsByClassName("selectize-input")[0].children;
@@ -154,7 +155,8 @@
             ajax_handler(function(response){
                 response = JSON.parse(response);
                 if(response.status == "ok"){
-                    alert("Deu certo");
+                    notyf.confirm('O material foi editado com sucesso!');
+                    window.scrollTo(0, 0);
                 }else{
                     alert(response.message);
                 }

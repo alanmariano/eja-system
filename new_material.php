@@ -28,11 +28,11 @@
             <div class="col-sm-4">
                 <div class="page-header float-left">
                     <div class="page-title">
-                        <h1>Dashboard</h1>
+                        <h1>Cadastro de material</h1>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-8">
+            <!--<div class="col-sm-8">
                 <div class="page-header float-right">
                     <div class="page-title">
                         <ol class="breadcrumb text-right">
@@ -40,7 +40,7 @@
                         </ol>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
 
         <div class="content mt-3">
@@ -118,6 +118,7 @@
 
     <script>
 
+        var notyf = new Notyf();
 
         function submitForm() {
             var tags = document.getElementsByClassName("selectize-input")[0].children;
@@ -142,7 +143,8 @@
             ajax_handler(function(response){
                 response = JSON.parse(response);
                 if(response.status == "ok"){
-                    alert("Deu certo");
+                    notyf.confirm('O material foi cadastrado com sucesso!');
+                    window.scrollTo(0, 0);
                 }else{
                     alert(response.message);
                 }
@@ -151,7 +153,8 @@
             
         }
         
-        
+        var plugin_tags;
+        var frame_id;
 
         ( function ( $ ) {
             "use strict";
@@ -159,6 +162,7 @@
             
            
             $(document).ready(function() {
+
                 CKEDITOR.replace( 'editor' );
 
                 $('#select-tags').selectize({
@@ -176,6 +180,8 @@
                         }
                     }
                 });
+
+                
 
             });
            
