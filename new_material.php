@@ -119,14 +119,11 @@
     <script>
 
         var notyf = new Notyf();
+        var selectizeNew;
 
         function submitForm() {
-            var tags = document.getElementsByClassName("selectize-input")[0].children;
-            var array_tags = [];
-            for(var i=0; i< tags.length; i++){
-                if(tags[i].dataset.value != null)
-                    array_tags[i] = tags[i].dataset.value;
-            }
+
+            var array_tags = selectizeNew[0].selectize.items;
 
             var data = {
                 func: "new_material",
@@ -152,9 +149,6 @@
             }, json );
             
         }
-        
-        var plugin_tags;
-        var frame_id;
 
         ( function ( $ ) {
             "use strict";
@@ -165,7 +159,7 @@
 
                 CKEDITOR.replace( 'editor' );
 
-                $('#select-tags').selectize({
+                selectizeNew = $('#select-tags').selectize({
                     delimiter: ',',
                     persist: false,
                     create: function(input) {

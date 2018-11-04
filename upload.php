@@ -1,7 +1,12 @@
 <?php
 
+require_once (__DIR__ . "/db/db_handler.php");
+$db = new DB_Handler();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
+    //echo json_encode(array("status" => "teste", "msg" => json_decode($_POST["tags"])));
+
     if (isset($_FILES['file'])) {        
 
         $errors = [];
@@ -29,6 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($errors)) {
+
+            if(!empty($_POST["tags"])){
+                $data["image_path"] = $path.$file_new_name;
+                $data["tags"] = json_decode($_POST["tags"]);
+                $result = $db->new_image($data); 
+            }            
+
             if(is_dir(__DIR__.'/images/uploads/'.$year."/")){
                 if(is_dir(__DIR__.'/images/uploads/'.$year."/".$month."/")){
                     move_uploaded_file($file_tmp, $file); 
@@ -43,6 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 move_uploaded_file($file_tmp, $file);
                 echo json_encode(array("status" => "ok", "img_path" => $path.$file_new_name));
             }
+
+
+
         }
 
 

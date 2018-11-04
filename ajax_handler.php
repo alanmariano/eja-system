@@ -38,5 +38,11 @@
         $db = new DB_Handler();
         echo json_encode($db->get_materials($query));
     }
+
+    if($data->func == "search_images"){
+        $query = array("titulo" => $data->titulo);
+        $db = new DB_Handler();
+        echo json_encode($db->search_images($query));
+    }
     
 ?>

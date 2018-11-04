@@ -1,3 +1,7 @@
+var selectizePlugin;
+var search_input_id;
+var plugin_tags;
+var frame_id;
 CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
     return {
         title: 'Banco de imagens',
@@ -11,7 +15,48 @@ CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
                     {
                         type: 'text',
                         id: 'search-input',
-                        label: 'Busca de imagens'
+                        label: 'Busca de imagens',
+                        onShow: function(element){
+                            search_input_id = this._.inputId;
+                        }
+                    },
+                    {
+                        type: 'button',
+                        id: 'btn-search-images',
+                        label: 'Buscar',
+                        title: 'Buscar imagens',
+                        onClick: function() {
+
+                            if(document.getElementById(search_input_id).value != ""){
+                                
+                                var json = {
+                                    func: 'search_images',
+                                    titulo: document.getElementById(search_input_id).value
+                                };
+
+                                var data = JSON.stringify(json);
+                                
+                                jQuery.ajax({
+                                    url: 'ajax_handler.php', 
+                                    cache: false,
+                                    contentType: false,
+                                    processData: false,
+                                    data: data,                         
+                                    type: 'post',
+                                    success: function(php_script_response){
+                                        var response = JSON.parse(php_script_response);
+                                        console.log(response); 
+                                    },
+                                    error: function(error){
+                                        console.log(error);
+                                    }
+                                });
+                            }else{
+                                console.log("campo de pesquisa vazio");
+                            }
+                            
+                            //alert( 'Clicked: ' + this.id + document.getElementById(search_input_id).value);
+                        }
                     }
                 ]
 
@@ -25,7 +70,7 @@ CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
                         id: 'image-tags',
                         label: 'Tags',
                         onShow: function(element){
-                            jQuery("#"+this._.inputId).selectize({
+                            selectizePlugin = jQuery("#"+this._.inputId).selectize({
                                 delimiter: ',',
                                 persist: false,
                                 create: function(input) {
@@ -59,16 +104,23 @@ CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
         ],
         onOk: function(){
             var dialog = this;
+            
+            //creating img html tag
             var img = editor.document.createElement( 'img' );
 
-            var url = "upload.php";
-
+            //getting file
             var iframe = document.getElementById(frame_id).contentDocument || document.getElementById(frame_id).contentWindow.document ;
             var file = iframe.getElementsByName("image-upload-file")[0].files[0]; 
             console.log(file);
+    
+            //getting tags
+            var tags = selectizePlugin[0].selectize.items;
+            console.log(tags);
+
             var formData = new FormData();
             
             formData.append('file', file);
+            formData.append('tags', JSON.stringify(tags));
 
             jQuery.ajax({
                 url: 'upload.php', 
@@ -85,7 +137,7 @@ CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
                     }
                     console.log(response); 
                 }
-             });
+            });
 
         }
     };

@@ -120,14 +120,11 @@
         var owner;
         var id;
         var notyf = new Notyf();
+        var selectizeEdit;
         
         function submitForm() {
-            var tags = document.getElementsByClassName("selectize-input")[0].children;
-            var array_tags = [];
-            for(var i=0; i< tags.length; i++){
-                if(tags[i].dataset.value != null)
-                    array_tags[i] = tags[i].dataset.value;
-            }
+
+            var array_tags = selectizeEdit[0].selectize.items;
             
             var data;
 
@@ -200,7 +197,7 @@
 
                     document.getElementById("select-tags").value = r[0].tags; 
 
-                    $('#select-tags').selectize({
+                    selectizeEdit = $('#select-tags').selectize({
                         delimiter: ',',
                         persist: false,
                         create: function(input) {

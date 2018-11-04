@@ -23,7 +23,7 @@ class DB_Handler{
 
 
     //CRUD functions
-    ////////////////////////NEW
+    ////////////////////////NEW MATERIALS
     function new_material($material){    
 
         try{
@@ -68,7 +68,7 @@ class DB_Handler{
     }
 
 
-    ////////////////////EDIT
+    ////////////////////EDIT MATERIALS
     function edit_material($material){    
 
         try{
@@ -144,7 +144,7 @@ class DB_Handler{
         }    
     }
 
-    ///////////////////////DELETE
+    ///////////////////////DELETE MATERIALS
     function delete_materials($materials){
 
         try{
@@ -310,6 +310,64 @@ class DB_Handler{
             
         }catch(Exception $e){
             return $e->getMessage();
+        }   
+    }
+
+
+    /////////////////////// NEW IMAGE
+    function new_image($data){
+        $image_path = $data['image_path'];
+        $erros = array();
+        try{
+            $db = $this->database;
+            $collection = $this->client->$db->tags_imagens;
+
+            foreach($data['tags'] as $tag){
+                try{
+                    $updateResult = $collection->updateOne(
+                        [ 'titulo' => $tag ],
+                        [ '$addToSet' => [ 'imagens' => $image_path ]],
+                        [ 'upsert' => true]
+                    );
+                }catch(Exception $e){
+                    $erros[] = $e->getMessage();
+                }
+            }
+
+            if(empty($erros)){
+                return array("status" => "ok", "message" => "Inserido com sucesso");
+            }else{
+                return array("status" => "error", "message" => "Erro ao inserir ao menos uma tag. Erro: ".$erros[0]);
+            }
+        }catch(Exception $e){
+            return array("status" => "error", "message" => "Erro ao inserir imagem. Erro: ".$e->getMessage());
+        }
+    }
+
+
+    /////////////////////// SEARCH IMAGES
+    function search_images($query, $options = array()){
+
+        try{
+
+            $db = $this->database;
+            $collection = $this->client->$db->tags_imagens;
+
+            $document = $collection->findOne(
+                $query
+            );
+            
+            if($document == null){
+                return array("status" => "error", "message" => "Tag não encontrada");
+            }else{
+                foreach($document->imagens as $imagem){
+                    $images[] = $imagem;
+                }
+                return array("status" => "ok", "images" => $images);
+            }
+            
+        }catch(Exception $e){
+            return array("status" => "error", "message" => $e->getMessage());
         }   
     }
 
