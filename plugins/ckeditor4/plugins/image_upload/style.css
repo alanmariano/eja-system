@@ -1,0 +1,14 @@
+.images-result{
+    /*flex: 1 0 21% !important; /* explanation below */
+    margin: 5px !important;
+    height: 80px !important;
+}
+
+#div-images-results{
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+.images-result-selected{
+    border: 5px solid #38db2d !important;
+}

@@ -1,7 +1,13 @@
+/*
+ Copyright (c) 2018, Alan Mariano da Silva - https://github.com/alanmariano. All rights reserved.
+ For licensing, see LICENSE.md
+*/
+
 var selectizePlugin;
 var search_input_id;
 var plugin_tags;
 var frame_id;
+var path = "http://localhost/tcc";
 CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
     return {
         title: 'Banco de imagens',
@@ -45,7 +51,13 @@ CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
                                     type: 'post',
                                     success: function(php_script_response){
                                         var response = JSON.parse(php_script_response);
-                                        console.log(response); 
+                                        document.getElementById('div-images-results').innerHTML = '';
+                                        var html = '';
+                                        response.images.forEach(element => {
+                                            html += "<img class='images-result' src = '"+ path + element +"' alt=''>";
+                                        });
+                                        document.getElementById('div-images-results').innerHTML = html;
+                                        //console.log(response); 
                                     },
                                     error: function(error){
                                         console.log(error);
@@ -57,6 +69,10 @@ CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
                             
                             //alert( 'Clicked: ' + this.id + document.getElementById(search_input_id).value);
                         }
+                    },
+                    {
+                        type: 'html',
+                        html: '<div id="div-images-results"> </div>'
                     }
                 ]
 
@@ -103,42 +119,70 @@ CKEDITOR.dialog.add( 'imgDialog', function ( editor ) {
             }
         ],
         onOk: function(){
-            var dialog = this;
+            //var dialog = this;
             
-            //creating img html tag
+            var tab = CKEDITOR.dialog.getCurrent().definition.dialog._.currentTabId;
+
             var img = editor.document.createElement( 'img' );
-
-            //getting file
-            var iframe = document.getElementById(frame_id).contentDocument || document.getElementById(frame_id).contentWindow.document ;
-            var file = iframe.getElementsByName("image-upload-file")[0].files[0]; 
-            console.log(file);
-    
-            //getting tags
-            var tags = selectizePlugin[0].selectize.items;
-            console.log(tags);
-
-            var formData = new FormData();
             
-            formData.append('file', file);
-            formData.append('tags', JSON.stringify(tags));
+            if(tab == 'tab-upload'){ //upload code
+                //creating img html tag
 
-            jQuery.ajax({
-                url: 'upload.php', 
-                cache: false,
-                contentType: false,
-                processData: false,
-                data: formData,                         
-                type: 'post',
-                success: function(php_script_response){
-                    var response = JSON.parse(php_script_response);
-                    if(response.status == "ok"){
-                        img.setAttribute ( 'src', "http://localhost/tcc"+response.img_path );
-                        editor.insertElement( img );
+                //getting file
+                var iframe = document.getElementById(frame_id).contentDocument || document.getElementById(frame_id).contentWindow.document ;
+                var file = iframe.getElementsByName("image-upload-file")[0].files[0]; 
+        
+                //getting tags
+                var tags = selectizePlugin[0].selectize.items;
+
+                var formData = new FormData();
+                
+                formData.append('file', file);
+                formData.append('tags', JSON.stringify(tags));
+
+                jQuery.ajax({
+                    url: 'upload.php', 
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: formData,                         
+                    type: 'post',
+                    success: function(php_script_response){
+                        var response = JSON.parse(php_script_response);
+                        if(response.status == "ok"){
+                            img.setAttribute ( 'src', path+response.img_path );
+                            editor.insertElement( img );
+                        }
+                        console.log(response); 
                     }
-                    console.log(response); 
-                }
-            });
+                });
 
+            }else if(tab == 'tab-search'){ //if ok is clicked when search is active, try to get selected image to insert into editor html
+                if(document.getElementsByClassName('images-result-selected').length > 0){
+                    var src = document.getElementsByClassName('images-result-selected')[0].src;
+                    img.setAttribute ( 'src', src );
+                    editor.insertElement( img );
+                }  
+            }
+
+            //clear form
+            selectizePlugin[0].selectize.clear();
+            document.getElementById('div-images-results').innerHTML = '';
+            
+            
+        },
+        onCancel: function(){
+            selectizePlugin[0].selectize.clear();
+            document.getElementById('div-images-results').innerHTML = '';
         }
     };
 });
+
+document.addEventListener('click',function(e){
+    if(e.target && e.target.classList[0] == 'images-result'){
+        if(document.getElementsByClassName('images-result-selected').length > 0){
+            document.getElementsByClassName('images-result-selected')[0].classList.remove('images-result-selected'); 
+        }
+        e.target.className += ' images-result-selected';
+    }
+ })

@@ -14,5 +14,6 @@
 <link rel="stylesheet" type="text/css" href="assets/css/selectize.default.css" />  
 <link rel="stylesheet" type="text/css" href="assets/css/notyf.min.css" />
 <link rel="stylesheet" type="text/css" href="assets/css/lib/vector-map/jqvmap.min.css" />
+<link rel="stylesheet" type="text/css" href="assets/css/project.style.css" />    
 
 <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800" />

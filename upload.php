@@ -4,8 +4,6 @@ require_once (__DIR__ . "/db/db_handler.php");
 $db = new DB_Handler();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    //echo json_encode(array("status" => "teste", "msg" => json_decode($_POST["tags"])));
 
     if (isset($_FILES['file'])) {        
 

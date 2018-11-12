@@ -17,8 +17,6 @@ window.onload = function(e){
         oid: id
     }; 
 
-    console.log("carreguei", data);
-
     var json = JSON.stringify(data);
                 
     ajax_handler(function(response){                    

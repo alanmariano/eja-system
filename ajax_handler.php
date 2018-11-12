@@ -29,7 +29,6 @@
         }
         $db = new DB_Handler();
         echo json_encode($db->delete_materials($materials));
-
     }
 
     if($data->func == "get_material"){
