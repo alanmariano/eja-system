@@ -1,3 +1,16 @@
+<?php
+
+    require_once (__DIR__ . "/classes/User.php");
+
+    session_start();
+
+    if (!isset($_SESSION['logged']) || !$_SESSION['logged']) {
+        header("Location: login.php");
+        die();
+    }
+
+?>
+
 <!doctype html>
 
 <html>

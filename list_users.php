@@ -8,11 +8,25 @@
     if (!isset($_SESSION['logged']) || !$_SESSION['logged']) {
         header("Location: login.php");
         die();
+    }else if($_SESSION['user']->getRole() != "admin"){
+        header("Location: index.php");
+        die();
     }
 
-
     $db = new DB_Handler();
-    $materials = $db->get_user_materials($_SESSION['user']->getOid());
+
+    $query = array();
+    $options = array(
+        "sort" => array(
+            "nome" => 1
+        ),
+        "projection" => array(
+            "materiais" => 0,
+            "senha"     => 0
+        )
+    );
+
+    $users = $db->get_users($query, $options);
 
     
 ?>
@@ -58,7 +72,7 @@
             <div class="col-sm-4">
                 <div class="page-header float-left">
                     <div class="page-title">
-                        <h1>Meus materiais</h1>
+                        <h1>Lista de usuários</h1>
                     </div>
                 </div>
             </div>
@@ -79,19 +93,19 @@
                     <div class="modal-dialog modal-sm" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="smallmodalLabel">Deleção de material</h5>
+                                <h5 class="modal-title" id="smallmodalLabel">Deleção de usuário</h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div class="modal-body">
                                 <p>
-                                    Você está deletando o material "<strong id="delete_material_title"></strong>", deseja continuar?
+                                    Você está deletando o usuário "<strong id="delete_user_email"></strong>", deseja continuar?
                                 </p>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="confirm_delete_material();" >Confirmar</button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="confirm_delete_user();" >Confirmar</button>
                             </div>
                         </div>
                     </div>
@@ -110,19 +124,19 @@
             <div class="col-sm-12 col-md-12 col-lg-12">
          
                 <?php
-                    if(is_object($materials)){
-                        foreach($materials as $m){
+                    if(is_array($users)){
+                        foreach($users as $u){
 
                 ?>
 
-                    <div class="card" data-id="<?php echo $m->_id; ?>">
+                    <div class="card" data-id="<?php echo $u['oid']; ?>">
                         <div class="card-header">
-                            <strong class="card-title"><a class="title_links" href="#" onclick="view_material(1,'<?php echo $m->_id; ?>');" ><?php echo $m->titulo ?></a>
+                            <strong class="card-title"><?php echo $u['nome'] ?>
                                 <small>
-                                    <?php if($m->privacidade == '0'){ ?>
-                                        <span class="badge badge-success float-right mt-1">Público</span>
+                                    <?php if($u['funcao'] == 'teacher'){ ?>
+                                        <span class="badge badge-success float-right mt-1">Professor</span>
                                     <?php }else{ ?>
-                                        <span class="badge badge-dark float-right mt-1">Privado</span>
+                                        <span class="badge badge-dark float-right mt-1">Administrador</span>
                                     <?php } ?>
                                 </small>
                             </strong>                                    
@@ -130,17 +144,13 @@
                         <div class="card-body">
                             <div class="row no-gutters">
                                 <div class="col-sm-12 col-md-12 col-lg-12">
-                                    <strong>Tags: </strong>
-                                    <?php foreach($m->tags as $tag){ ?> 
-                                        <span class="badge badge-secondary"><?php echo $tag;?></span>
-                                    <?php } ?>
+                                    <strong>Email: <?php echo $u['email'];?></strong>                                    
                                 </div>
                             </div>
                             <div class="row no-gutters">
                                 <div class="col-sm-12 col-md-12 col-lg-12">
-                                    <button type="button" data-toggle="modal" data-target="#smallmodal" onclick="delete_material(1,'<?php echo $m->_id; ?>','<?php echo $m->titulo ?>');" class="btn btn-danger btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Deletar</button>
-                                    <button type="button" onclick="edit_material(1,'<?php echo $m->_id; ?>');" class="btn btn-primary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Editar</button>
-                                    <button type="button" onclick="view_material(1,'<?php echo $m->_id; ?>');" class="btn btn-secondary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Visualizar</button>    
+                                    <button type="button" data-toggle="modal" data-target="#smallmodal" onclick="delete_user('<?php echo $u['oid']; ?>','<?php echo $u['email'] ?>');" class="btn btn-danger btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Deletar</button>
+                                    <button type="button" onclick="edit_user('<?php echo $u['oid']; ?>');" class="btn btn-primary btn-sm float-lg-right float-md-right" style="margin: 2px 5px;" >Editar</button>   
                                 </div>
                             </div>
                         </div>
@@ -149,7 +159,7 @@
                 <?php
                         }
                     }else{
-                        echo $materials;
+                        echo $users;
                     }
                 
                 ?>
@@ -172,25 +182,18 @@
 
         var notyf = new Notyf();
 
-        function edit_material(o, i){
-            sessionStorage.setItem("o",o);
-            sessionStorage.setItem("i",i);
-            document.location.href = 'edit_material.php';
+        function edit_user(i){
+            sessionStorage.setItem("id_user_edit",i);
+            document.location.href = 'edit_user.php';
         }
 
 
-        function view_material(o, i){
-            sessionStorage.setItem("o",o);
-            sessionStorage.setItem("i",i);
-            window.open('view_material.php', '_blank');
-        }
+        function delete_user(i, e){
 
-        function delete_material(o, i, t){
-
-            document.getElementById("delete_material_title").innerHTML = t;
+            document.getElementById("delete_user_email").innerHTML = e;
 
             data = {
-                func: "delete_materials",
+                func: "delete_users",
                 oids: [
                     i
                 ]
@@ -199,7 +202,7 @@
 
         }
 
-        function confirm_delete_material(){
+        function confirm_delete_user(){
             var ids = JSON.parse(json);
             ajax_handler(function(response){
                 response = JSON.parse(response);
@@ -208,7 +211,7 @@
                     for(var i=0; i<ids.oids.length; i++){
                         document.querySelectorAll("[data-id='"+ids.oids[i]+"']")[0].outerHTML = "";
                     }
-                    notyf.confirm('O material foi removido com sucesso!');
+                    notyf.confirm('O usuário foi removido com sucesso!');
                 }                
             }, json );
         }

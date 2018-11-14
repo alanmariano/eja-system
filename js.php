@@ -1,4 +1,3 @@
-
     <script src="assets/js/vendor/jquery-2.1.4.min.js" type="text/javascript"></script>
     <script src="assets/js/popper.min.js" type="text/javascript"></script>
     <script src="assets/js/plugins.js" type="text/javascript"></script>
@@ -12,7 +11,6 @@
 <script>
     function ajax_handler(func, json){
         var xhttp = new XMLHttpRequest();
-        console.log("aaa");
         try{
             xhttp.open("POST", "ajax_handler.php", true);
             xhttp.setRequestHeader("Content-type", "application/json");
@@ -28,4 +26,18 @@
             }
         };
     }
+
+    function logout(){
+        var data = {
+            func: "logout"
+        };
+
+        var json = JSON.stringify(data);
+
+        ajax_handler(function(response){
+            console.log("a");
+            document.location.href = 'login.php';
+        }, json );
+    }
+
 </script>

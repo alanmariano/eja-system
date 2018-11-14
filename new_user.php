@@ -1,11 +1,14 @@
 <?php
-
+    
     require_once (__DIR__ . "/classes/User.php");
 
     session_start();
 
     if (!isset($_SESSION['logged']) || !$_SESSION['logged']) {
         header("Location: login.php");
+        die();
+    }else if($_SESSION['user']->getRole() != "admin"){
+        header("Location: index.php");
         die();
     }
 
@@ -41,7 +44,7 @@
             <div class="col-sm-4">
                 <div class="page-header float-left">
                     <div class="page-title">
-                        <h1>Cadastro de material</h1>
+                        <h1>Cadastro de usuário</h1>
                     </div>
                 </div>
             </div>
@@ -70,44 +73,39 @@
             <div class="col-sm-12 col-md-12 col-lg-12">
                 <div class="card">
                     <div class="card-header">
-                        <strong>Novo</strong> material didático
+                        <strong>Novo</strong> usuário
                     </div>
                     <div class="card-body card-block">
-                        <form action="" method="post" onSubmit="submitForm();return false;" enctype="multipart/form-data" id="new-material-form" class="form-horizontal">
+                        <form action="" method="post" onSubmit="submitForm();return false;" enctype="multipart/form-data" id="new-user-form" class="form-horizontal">
                             <div class="row form-group">
-                                <div class="col col-md-3"><label for="title" class=" form-control-label">Título</label></div>
-                                <div class="col-12 col-md-9"><input type="text" id="title" name="title" placeholder="Título" class="form-control"><small class="form-text text-muted">Insira o título de seu material</small></div>
+                                <div class="col col-md-3"><label for="name" class=" form-control-label">Nome</label></div>
+                                <div class="col-12 col-md-9"><input type="text" id="name" name="name" placeholder="Nome completo" class="form-control"><small class="form-text text-muted">Insira o nome completo do usuário</small></div>
                             </div>
                             <div class="row form-group">
-                                <div class="col col-md-3"><label class=" form-control-label">Material privado</label></div>
+                                <div class="col col-md-3"><label for="email" class=" form-control-label">Email</label></div>
+                                <div class="col-12 col-md-9"><input type="text" id="email" name="email" placeholder="Email" class="form-control"><small class="form-text text-muted">Insira o email do usuário</small></div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3"><label for="password" class=" form-control-label">Senha</label></div>
+                                <div class="col-12 col-md-9"><input type="password" id="password" name="password" placeholder="Senha" class="form-control"><small class="form-text text-muted">Insira a senha do usuário</small></div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3"><label class=" form-control-label">Função</label></div>
                                 <div class="col col-md-9">
                                     <div class="form-check">
                                         <div class="radio">
-                                            <label for="radioSim" class="form-check-label ">
-                                                <input type="radio" id="radioSim" name="privacy" value="1" class="form-check-input">Sim
+                                            <label for="radioProf" class="form-check-label ">
+                                                <input type="radio" id="radioProf" name="role" checked="true" value="teacher" class="form-check-input">Professor
                                             </label>
                                         </div>
                                         <div class="radio">
-                                            <label for="radioNao" class="form-check-label ">
-                                                <input type="radio" id="radioNao" checked="true" name="privacy" value="0" class="form-check-input">Não
+                                            <label for="radioAdmin" class="form-check-label ">
+                                                <input type="radio" id="radioAdmin" name="role" value="admin" class="form-check-input">Administrador
                                             </label>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row form-group">
-                                <div class="col col-md-3"><label for="textarea-input" class=" form-control-label">Tags</label></div>
-                                <div class="col-12 col-md-9">
-                                    <input type="text" id="select-tags"/>
-                                </div>
-                            </div>
-                            <div class="row form-group">
-                                <div class="col col-md-3"><label for="textarea-input" class=" form-control-label">Conteúdo</label></div>
-                                <div class="col-12 col-md-9">
-                                    <textarea id="editor">
-                                    </textarea>
-                                </div>
-                            </div>
+                            </div>                            
                             <div class="card-footer">
                                 <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="fa fa-dot-circle-o"></i> Enviar
@@ -132,28 +130,24 @@
     <script>
 
         var notyf = new Notyf();
-        var selectizeNew;
-
+        
         function submitForm() {
 
-            var array_tags = selectizeNew[0].selectize.items;
-
             var data = {
-                func: "new_material",
-                title: document.getElementById("title").value,
-                privacy: document.querySelector('input[name="privacy"]:checked').value,
-                tags: array_tags,
-                content: CKEDITOR.instances.editor.getData()
+                func: "new_user",
+                name: document.getElementById("name").value,
+                role: document.querySelector('input[name="role"]:checked').value,
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value
             };
 
-            var json = JSON.stringify(data);
-
-            console.log(json);  
+            var json = JSON.stringify(data);  
 
             ajax_handler(function(response){
+                console.log(response);
                 response = JSON.parse(response);
                 if(response.status == "ok"){
-                    notyf.confirm('O material foi cadastrado com sucesso!');
+                    notyf.confirm('O usuário foi cadastrado com sucesso!');
                     window.scrollTo(0, 0);
                 }else{
                     notyf.alert(response.message);
@@ -168,29 +162,7 @@
 
             
            
-            $(document).ready(function() {
-
-                CKEDITOR.replace( 'editor' );
-
-                selectizeNew = $('#select-tags').selectize({
-                    delimiter: ',',
-                    persist: false,
-                    create: function(input) {
-                        return {
-                            value: input,
-                            text: input
-                        }
-                    },
-                    render: {
-                        option_create: function (data, escape) {
-                            return '<div class="create">Adicionar <strong>' + escape(data.input) + '</strong>&hellip;</div>';
-                        }
-                    }
-                });
-
-                
-
-            });
+            
            
         } )( jQuery );
 

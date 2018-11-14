@@ -1,23 +1,23 @@
 <?php
      
     require_once (__DIR__ . "/classes/Material.php");
+    require_once (__DIR__ . "/classes/User.php");
     require_once (__DIR__ . "/db/db_handler.php");
     require_once (__DIR__ . "/vendor/autoload.php");
+
+    session_start();
     
     $rawdata = file_get_contents('php://input');
     $data = json_decode($rawdata);
 
-    $author = "5bac156c3ed8327ae72f2aa7"; //admin
-    //$author = "5bac156c3ed8327ae72f2ab7"; //user fake para testes
-
     if($data->func == "new_material"){
-        $material = new Material(null, $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("$author"));
+        $material = new Material(null, $data->title, $data->content, $data->privacy, $data->tags, $_SESSION['user']->getOid());
         $db = new DB_Handler();
         echo json_encode($db->new_material($material));
     }
 
     if($data->func == "edit_material"){
-        $material = new Material(new MongoDB\BSON\ObjectId("$data->oid"), $data->title, $data->content, $data->privacy, $data->tags, new MongoDB\BSON\ObjectId("$author"));
+        $material = new Material(new MongoDB\BSON\ObjectId("$data->oid"), $data->title, $data->content, $data->privacy, $data->tags, $_SESSION['user']->getOid());
         $db = new DB_Handler();
         echo json_encode($db->edit_material($material));
     }
@@ -25,7 +25,7 @@
     if($data->func == "delete_materials"){
         $materials = array();
         foreach($data->oids as $oid){
-            $materials[] = new Material(new MongoDB\BSON\ObjectId("$oid"), null, null, null, null, new MongoDB\BSON\ObjectId("$author"));
+            $materials[] = new Material(new MongoDB\BSON\ObjectId("$oid"), null, null, null, null, $_SESSION['user']->getOid());
         }
         $db = new DB_Handler();
         echo json_encode($db->delete_materials($materials));
@@ -42,6 +42,45 @@
         $query = array("titulo" => $data->titulo);
         $db = new DB_Handler();
         echo json_encode($db->search_images($query));
+    }
+
+    if($data->func == "new_user"){
+        $user = new User(null, $data->name, $data->email, $data->password, null, $data->role);
+        $db = new DB_Handler();
+        echo json_encode($db->new_user($user));
+    }
+
+    if($data->func == "delete_users"){
+        $users = array();
+        foreach($data->oids as $oid){
+            $users[] = new User(new MongoDB\BSON\ObjectId("$oid"), null, null, null, null, null);
+        }
+        $db = new DB_Handler();
+        echo json_encode($db->delete_users($users));
+    }
+
+    if($data->func == "get_user"){
+        $oid = new MongoDB\BSON\ObjectId("$data->oid");
+        $query = array("_id" => $oid);
+        $db = new DB_Handler();
+        echo json_encode($db->get_users($query));
+    }
+
+    if($data->func == "edit_user"){
+        $user = new User(new MongoDB\BSON\ObjectId("$data->oid"), $data->name, $data->email, $data->password, null, $data->role);
+        $db = new DB_Handler();
+        echo json_encode($db->edit_user($user));
+    }
+
+    if($data->func == "login"){
+        $user = new User(null, null, $data->email, $data->password, null, null);
+        $db = new DB_Handler();
+        echo json_encode($db->login($user));
+    }
+
+    if($data->func == "logout"){
+        session_destroy();
+        echo json_encode(array("status" => "ok"));
     }
     
 ?>

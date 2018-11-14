@@ -4,23 +4,19 @@
     require_once (__DIR__ . "/../vendor/autoload.php");
     
 
-
-    
-
 class DB_Handler{
 
     private $client;
-    public $database;   
-    public $author;
+    public $database;  
+
+    
 
     public function __construct(){
         $this->database = "project_db";
-        $this->author = "5bac156c3ed8327ae72f2aa7";
         $user = "admin";
         $pwd = "pass123ASSFv";
         $this->client = new MongoDB\Client("mongodb://${user}:${pwd}@127.0.0.1:27017");        
     }
-
 
     //CRUD functions
     ////////////////////////NEW MATERIALS
@@ -140,7 +136,7 @@ class DB_Handler{
             }            
 
         }catch(Exception $e){
-            return $e->getMessage();
+            return array("status" => "error", "message" => $e->getMessage());
         }    
     }
 
@@ -188,16 +184,15 @@ class DB_Handler{
 
     }
 
-    function get_user_materials(){
+    function get_user_materials($author){
 
         try{
             $db = $this->database;
             $collection = $this->client->$db->materiais_didaticos;
-            $oid = new MongoDB\BSON\ObjectId("$this->author");
 
             $cursor = $collection->find(
                 [
-                    'autor' => $oid
+                    'autor' => $author
                 ],
                 [
                     'sort' => ['titulo' => 1],
@@ -370,6 +365,190 @@ class DB_Handler{
             return array("status" => "error", "message" => $e->getMessage());
         }   
     }
+
+
+    //////////////////////////////NEW USER
+    function new_user($user){    
+        
+        try{
+            $db = $this->database;
+            $collection = $this->client->$db->usuarios;
+
+            $pass = password_hash($user->getPassword(), PASSWORD_DEFAULT);
+
+            $insertOneResult = $collection->insertOne(
+                [
+                    'nome' => $user->getName(),
+                    'email' => $user->getEmail(),
+                    'senha' => $pass,
+                    'funcao' => $user->getRole()
+                ]
+            );
+
+            if($insertOneResult->getInsertedCount()>0){                
+                return array("status" => "ok", "message" => "Inserido com sucesso");
+            }else{
+                return array("status" => "error", "message" => "Usuário não foi inserido");
+            }
+
+        }catch(Exception $e){
+            return array("status" => "error", "message" => "Erro ao inserir usuário. Erro: ".$e->getMessage());
+        }    
+    }
+
+
+    //////////////////GET ALL USERS
+    function get_users($query = array(), $options = array()){
+
+        try{
+            $db = $this->database;
+            $collection = $this->client->$db->usuarios;
+
+            $response = array();
+
+            $cursor = $collection->find(
+                $query,
+                $options                
+            );
+
+            foreach ($cursor as $c){
+                $response[] = array(
+                    "oid"           =>  $c->_id->__toString(),
+                    "nome"        =>  $c->nome,
+                    "email"      =>  $c->email,
+                    "funcao"          =>  $c->funcao
+                );
+            }
+            return $response;
+
+        }catch(Exception $e){
+            return $e->getMessage();
+        }    
+
+    }
+
+    ///////////////////////DELETE MATERIALS
+    function delete_users($users){
+
+        try{
+            $db = $this->database;
+
+            foreach($users as $user){
+
+                $collection = $this->client->$db->usuarios;
+                $deleted = $collection->deleteOne(
+                    [
+                        "_id" => $user->getOid()
+                    ]
+                );
+
+                if($deleted->getDeletedCount()==1){
+                    continue;
+                }else if($deleted->getDeletedCount()==0){
+                    return array("status" => "error", "message" => "Erro ao deletar o usuário ".$user->getOid());
+                }
+            }
+
+            return array("status" => "ok", "message" => "Deletado com sucesso");
+
+        }catch(Exception $e){
+            return array("status" => "error", "message" => $e->getMessage());
+        }
+
+    }
+
+    ////////////////////EDIT MATERIALS
+    function edit_user($user){    
+
+        try{
+            $db = $this->database;
+            $collection = $this->client->$db->usuarios;
+
+            
+            $document = $collection->findOne(
+                [
+                    "_id" => $user->getOid()
+                ]
+            );
+
+            if($user->getPassword() != "" && !password_verify($user->getPassword(), $document->senha)){
+                $updated = $collection->findOneAndUpdate(
+                    [
+                        "_id" => $user->getOid()
+                    ],
+                    [
+                        '$set' => [
+                            'nome' => $user->getName(),
+                            'email' => $user->getEmail(),
+                            'senha' => password_hash($user->getPassword(), PASSWORD_DEFAULT),
+                            'funcao'  => $user->getRole()
+                        ]
+                    ],
+                    [
+                        'returnDocument' => MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                    ]
+                );
+            }else{
+                $updated = $collection->findOneAndUpdate(
+                    [
+                        "_id" => $user->getOid()
+                    ],
+                    [
+                        '$set' => [
+                            'nome' => $user->getName(),
+                            'email' => $user->getEmail(),
+                            'funcao'  => $user->getRole()
+                        ]
+                    ],
+                    [
+                        'returnDocument' => MongoDB\Operation\FindOneAndUpdate::RETURN_DOCUMENT_AFTER
+                    ]
+                );
+            }
+
+            if($updated != null){
+                return array("status" => "ok", "message" => "Editado com sucesso");
+            }else{
+                return array("status" => "error", "message" => "erro ao editar");
+            }
+
+        }catch(Exception $e){
+            return array("status" => "error", "message" => $e->getMessage());
+        }
+         
+    }
+
+    /////////////////////CHECK IF USER INPUT ON LOGIN IS RIGTH
+    function login($user){
+        try{
+            $db = $this->database;
+            $collection = $this->client->$db->usuarios;
+
+            $document = $collection->findOne(
+                [
+                    'email' => $user->getEmail()
+                ]
+            );
+
+            if($document == null){
+                return array("status" => "error", "message" => "Email incorreto");
+            }else{
+                if(password_verify($user->getPassword(), $document->senha)){
+                    //LOGOU
+                    session_start();
+                    $_SESSION["logged"] = true;
+                    $_SESSION["user"] = new User($document->_id, $document->nome, null, null, null, $document->funcao);
+
+                    return array("status" => "ok", "message" => "Logged in");
+                }else{
+                    return array("status" => "error", "message" => "Senha incorreta");
+                }
+            }
+        }catch(Exception $e){
+            return array("status" => "error", "message" => $e->getMessage());
+        }
+    }
+
 
 }
 

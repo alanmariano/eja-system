@@ -1,5 +1,10 @@
 <!-- Left Panel -->
+    <?php
+        
+        require_once (__DIR__ . "/classes/User.php");
+        session_start();
 
+    ?>
     <aside id="left-panel" class="left-panel">
         <nav class="navbar navbar-expand-sm navbar-default">
 
@@ -19,6 +24,16 @@
                     <li>
                         <a href="new_material.php"> <i class="menu-icon fa fa-plus-circle"></i>Novo material</a>
                     </li>
+                    <?php if(isset($_SESSION['logged']) && $_SESSION['user']->getRole() == "admin"){ ?>
+                        <li class="menu-item-has-children active dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-user"></i>Usuários</a>
+                            <ul class="sub-menu children dropdown-menu">
+                                <li><i class="fa fa-puzzle-piece"></i><a href="new_user.php">Adicionar</a></li>
+                                <li><i class="fa fa-list-ol"></i><a href="list_users.php">Listar</a></li>
+                            </ul>
+                        </li>
+                    <?php } ?>
+
                 </ul>
             </div>
             <!-- /.navbar-collapse -->

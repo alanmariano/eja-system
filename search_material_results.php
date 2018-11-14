@@ -1,8 +1,16 @@
 <?php
 
     require_once (__DIR__ . "/db/db_handler.php");
-    $db = new DB_Handler();
+    require_once (__DIR__ . "/classes/User.php");
+    
+    session_start();
 
+    if (!isset($_SESSION['logged']) || !$_SESSION['logged']) {
+        header("Location: login.php");
+        die();
+    }
+
+    $db = new DB_Handler();
 
     if(isset($_POST["search_input"])){
         $search_input = $_POST["search_input"];
