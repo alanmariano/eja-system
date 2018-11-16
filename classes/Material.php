@@ -9,15 +9,17 @@
         private $content;
         private $privacy;
         private $tags;
+        private $shareList;
         private $author;
 
         //Constructor
-        public function __construct($oid, $title, $content, $privacy, $tags, $author){
+        public function __construct($oid, $title, $content, $privacy, $tags, $shareList, $author){
             $this->setOid($oid);
             $this->setTitle($title);
             $this->setContent($content);
             $this->setPrivacy($privacy);
             $this->setTags($tags);
+            $this->setShareList($shareList);
             $this->setAuthor($author);
         }
 
@@ -40,6 +42,10 @@
 
         function getTags(){
             return $this->tags;
+        }
+
+        function getShareList(){
+            return $this->shareList;
         }
 
         function getAuthor(){
@@ -67,10 +73,24 @@
             $this->tags = $tags;
         }
 
+        function setShareList($shareList){
+            $this->shareList = array_unique($shareList);
+        }
+
         function setAuthor($author){
             $this->author = $author;
         }
 
+
+
+        function restrito(){
+            if($this->privacy == "restrito"){
+                return true;
+            }
+            else{ 
+                return false;
+            }
+        }
         
 
     }

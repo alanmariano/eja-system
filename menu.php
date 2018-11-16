@@ -18,14 +18,17 @@
 
             <div id="main-menu" class="main-menu collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li class="active">
+                    <li>
                         <a href="index.php"> <i class="menu-icon fa fa-dashboard"></i>Meus materiais</a>
                     </li>
                     <li>
                         <a href="new_material.php"> <i class="menu-icon fa fa-plus-circle"></i>Novo material</a>
                     </li>
+                    <li>
+                        <a href="shared_materials.php"> <i class="menu-icon fa fa-share-alt-square "></i>Compartilhados comigo</a>
+                    </li>
                     <?php if(isset($_SESSION['logged']) && $_SESSION['user']->getRole() == "admin"){ ?>
-                        <li class="menu-item-has-children active dropdown">
+                        <li class="menu-item-has-children dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-user"></i>Usuários</a>
                             <ul class="sub-menu children dropdown-menu">
                                 <li><i class="fa fa-puzzle-piece"></i><a href="new_user.php">Adicionar</a></li>

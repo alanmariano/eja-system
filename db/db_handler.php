@@ -26,13 +26,20 @@ class DB_Handler{
             $db = $this->database;
             $collection = $this->client->$db->materiais_didaticos;
 
+            //todo: avisar caso não tenha encontrado o email com o qual foi compartilhado
+
+            if(!$material->restrito()){
+                $material->setShareList(array());
+            }
+
             $insertOneResult = $collection->insertOne(
                 [
                     'titulo' => $material->getTitle(),
                     'privacidade' => $material->getPrivacy(),
                     'conteudo' => $material->getContent(),
                     'autor' => $material->getAuthor(),
-                    'tags'  => $material->getTags()
+                    'tags'  => $material->getTags(),
+                    'listaCompartilhamento' => $material->getShareList()
                 ]
             );
 
@@ -40,6 +47,9 @@ class DB_Handler{
 
                 $inserteId = $insertOneResult->getInsertedId();
                 
+                /*
+                    Inserindo as tags do material na collection de tags
+                */
                 $collection = $this->client->$db->tags_materiais;
 
                 foreach($material->getTags() as $tag){
@@ -52,7 +62,40 @@ class DB_Handler{
                     }catch(Exception $e){
                         return array("status" => "error", "message" => "Erro ao inserir tags. Erro: ".$e->getMessage());
                     }
-                }                
+                }
+
+
+                /*
+                    Inserindo o material na lista de materiais do usuario
+                */
+                $collection = $this->client->$db->usuarios;
+
+                try{
+                    $updateResult = $collection->updateOne(
+                        [ '_id' => $material->getAuthor() ],
+                        [ '$addToSet' => [ 'materiais' => $inserteId ]]
+                    );
+                }catch(Exception $e){
+                    return array("status" => "error", "message" => "Erro ao inserir material na coleção de usuários. Erro: ".$e->getMessage());
+                }
+
+
+                /*
+                    Inserindo o material na lista de materiais compartilhados do usuario
+                */
+                $collection = $this->client->$db->usuarios;
+
+                foreach($material->getShareList() as $email){
+                    try{
+                        $updateResult = $collection->updateOne(
+                            [ 'email' => $email ],
+                            [ '$addToSet' => [ 'materiaisCompartilhados' => $inserteId ]]
+                        );
+                    }catch(Exception $e){
+                        return array("status" => "error", "message" => "Erro ao inserir material na coleção de materiais compartilhados do usuários. Erro: ".$e->getMessage());
+                    }
+                }            
+
                 return array("status" => "ok", "message" => "Inserido com sucesso");
             }else{
                 return array("status" => "error", "message" => "Material não foi inserido");
@@ -79,8 +122,9 @@ class DB_Handler{
 
             if($document->autor->__toString() == $material->getAuthor()->__toString()){
 
-                $deleted = array_diff((array)$document->tags, (array)$material->getTags());
-                $added = array_diff((array)$material->getTags(), (array)$document->tags);
+                if(!$material->restrito()){
+                    $material->setShareList(array());
+                }
 
                 //return $deleted; 
                 $updated = $collection->findOneAndUpdate(
@@ -92,7 +136,8 @@ class DB_Handler{
                             'titulo' => $material->getTitle(),
                             'privacidade' => $material->getPrivacy(),
                             'conteudo' => $material->getContent(),
-                            'tags'  => $material->getTags()
+                            'tags'  => $material->getTags(),
+                            'listaCompartilhamento' => $material->getShareList()
                         ]
                     ],
                     [
@@ -100,9 +145,25 @@ class DB_Handler{
                     ]
                 );
 
+
+                ///// ATUALIZANDO COLEÇÃO DE TAGS
+                $tagsDeleted = array_diff((array)$document->tags, (array)$material->getTags());
+                $tagsAdded = array_diff((array)$material->getTags(), (array)$document->tags);
+
                 $collection = $this->client->$db->tags_materiais;
 
-                foreach($added as $a){
+                foreach($tagsDeleted as $d){
+                    try{
+                        $tagUpdateResult = $collection->updateOne(
+                            [ 'titulo' => $d ],
+                            [ '$pull' => [ 'materiais' => $material->getOid() ]]
+                        );
+                    }catch(Exception $e){
+                        return array("status" => "error", "message" => "Erro ao remover tags. Erro: ".$e->getMessage());
+                    }
+                }
+
+                foreach($tagsAdded as $a){
                     try{
                         $tagUpdateResult = $collection->updateOne(
                             [ 'titulo' => $a ],
@@ -114,18 +175,38 @@ class DB_Handler{
                     }
                 }
 
-                foreach($deleted as $d){
+                
+
+                /////////// ATUALIZANDO LISTA DE MATERIAIS COMPARTILHADOS DOS USUARIOS 
+                $collection = $this->client->$db->usuarios;
+
+                $shareListDeleted = array_diff((array)$document->listaCompartilhamento, (array)$material->getShareList());
+                $shareListAdded = array_diff((array)$material->getShareList(), (array)$document->listaCompartilhamento);
+    
+                foreach($shareListDeleted as $d){
                     try{
                         $tagUpdateResult = $collection->updateOne(
-                            [ 'titulo' => $d ],
-                            [ '$pull' => [ 'materiais' => $material->getOid() ]],
-                            [ 'upsert' => true]
+                            [ 'email' => $d ],
+                            [ '$pull' => [ 'materiaisCompartilhados' => $material->getOid() ]]
                         );
                     }catch(Exception $e){
                         return array("status" => "error", "message" => "Erro ao remover tags. Erro: ".$e->getMessage());
                     }
                 }
-    
+
+                foreach($shareListAdded as $a){
+                    try{
+                        $tagUpdateResult = $collection->updateOne(
+                            [ 'email' => $a ],
+                            [ '$addToSet' => [ 'materiaisCompartilhados' => $material->getOid() ]]
+                        );
+                    }catch(Exception $e){
+                        return array("status" => "error", "message" => "Erro ao inserir tags. Erro: ".$e->getMessage());
+                    }
+                }
+
+
+
                 if($updated != null){
                     return array("status" => "ok", "message" => "Editado com sucesso");
                 }else{
@@ -149,6 +230,8 @@ class DB_Handler{
             foreach($materials as $material){
 
                 $collection = $this->client->$db->materiais_didaticos;
+
+
                 $deleted = $collection->deleteOne(
                     [
                         "_id" => $material->getOid(),
@@ -156,21 +239,37 @@ class DB_Handler{
                     ]
                 );
 
-                $collection = $this->client->$db->tags_materiais;
                 
-                try{
-                    $tagUpdateResult = $collection->updateMany(
-                        [ ],
-                        [ '$pull' => [ 'materiais' => $material->getOid() ]],
-                        [ 'upsert' => true]
-                    );
-                }catch(Exception $e){
-                    return array("status" => "error", "message" => "Erro ao remover tags. Erro: ".$e->getMessage());
-                }
-                
-    
                 if($deleted->getDeletedCount()==1){
+
+                    $collection = $this->client->$db->tags_materiais;
+
+                    try{
+                        $tagUpdateResult = $collection->updateMany(
+                            [ ],
+                            [ '$pull' => [ 'materiais' => $material->getOid() ]]
+                        );
+                    }catch(Exception $e){
+                        return array("status" => "error", "message" => "Erro ao remover tags. Erro: ".$e->getMessage());
+                    }
+
+                    $collection = $this->client->$db->usuarios;
+
+                    try{
+                        $tagUpdateResult = $collection->updateMany(
+                            [ ],
+                            [ '$pull' => [ 
+                                'materiaisCompartilhados'   => $material->getOid(),
+                                'materiais'                 => $material->getOid()  
+                                ]
+                            ]
+                        );
+                    }catch(Exception $e){
+                        return array("status" => "error", "message" => "Erro ao remover material da lista de compartilhados com usuario. Erro: ".$e->getMessage());
+                    }
+
                     continue;
+
                 }else if($deleted->getDeletedCount()==0){
                     return array("status" => "error", "message" => "Erro ao deletar o material ".$material->getOid().". Material não existe ou você não é o autor.");
                 }
@@ -210,6 +309,55 @@ class DB_Handler{
 
     }
 
+    function get_shared_materials($userOid){
+
+        try{
+            $db = $this->database;
+            $collection = $this->client->$db->usuarios;
+
+            $document = $collection->findOne(
+                [
+                    '_id' => $userOid
+                ]
+            );
+
+            $collection = $this->client->$db->materiais_didaticos;
+
+            //return is_object($document->materiaisCompartilhados);
+
+            if(is_object($document->materiaisCompartilhados)  && !empty($document->materiaisCompartilhados[0])){
+                $cursor = $collection->find(
+                    [
+                        '_id' => ['$in' => $document->materiaisCompartilhados]
+                    ]
+                );
+
+                foreach($cursor as $c){
+
+                    $response[] = array(
+                        "oid"                           =>  $c->_id->__toString(),
+                        "titulo"                        =>  $c->titulo,
+                        "conteudo"                      =>  $c->conteudo,
+                        "tags"                          =>  $c->tags,
+                        "listaCompartilhamento"         =>  $c->listaCompartilhamento,
+                        "autor"                         =>  $c->autor->__toString(),
+                        "privacidade"                   =>  $c->privacidade
+                    ); 
+                    
+                }
+    
+                return $response;
+            }else{
+                return "Não há materiais compartilhados com você no momento.";
+            }
+            
+
+        }catch(Exception $e){
+            return $e->getMessage();
+        }    
+
+    }
+
     function get_materials($query, $single = true,  $options = array()){
 
         try{
@@ -224,12 +372,13 @@ class DB_Handler{
 
                 $response  = array();
                 $response[] = array(
-                    "oid"           =>  $document->_id->__toString(),
-                    "titulo"        =>  $document->titulo,
-                    "conteudo"      =>  $document->conteudo,
-                    "tags"          =>  $document->tags,
-                    "autor"         =>  $document->autor->__toString(),
-                    "privacidade"   =>  $document->privacidade
+                    "oid"                           =>  $document->_id->__toString(),
+                    "titulo"                        =>  $document->titulo,
+                    "conteudo"                      =>  $document->conteudo,
+                    "tags"                          =>  $document->tags,
+                    "listaCompartilhamento"         =>  $document->listaCompartilhamento,
+                    "autor"                         =>  $document->autor->__toString(),
+                    "privacidade"                   =>  $document->privacidade
                 );                 
 
                 return $response;
@@ -243,12 +392,13 @@ class DB_Handler{
                 $response  = array();
                 foreach($cursor as $c){
                     $response[] = array(
-                        "oid"           =>  $c->_id->__toString(),
-                        "titulo"        =>  $c->titulo,
-                        "conteudo"      =>  $c->conteudo,
-                        "tags"          =>  $c->tags,
-                        "autor"         =>  $c->autor->__toString(),
-                        "privacidade"   =>  $c->privacidade
+                        "oid"                           =>  $c->_id->__toString(),
+                        "titulo"                        =>  $c->titulo,
+                        "conteudo"                      =>  $c->conteudo,
+                        "tags"                          =>  $c->tags,
+                        "listaCompartilhamento"         =>  $c->listaCompartilhamento,
+                        "autor"                         =>  $c->autor->__toString(),
+                        "privacidade"                   =>  $c->privacidade
                     ); 
                 } 
 
@@ -282,7 +432,7 @@ class DB_Handler{
             $cursor = $collection->find(
                 [ 
                     "_id" => [ '$in' => $document->materiais],
-                    "privacidade" => "0"
+                    "privacidade" => "publico"
                 ],
                 $options
             );
@@ -290,12 +440,13 @@ class DB_Handler{
             foreach($cursor as $c){
 
                 $response[] = array(
-                    "oid"           =>  $c->_id->__toString(),
-                    "titulo"        =>  $c->titulo,
-                    "conteudo"      =>  $c->conteudo,
-                    "tags"          =>  $c->tags,
-                    "autor"         =>  $c->autor->__toString(),
-                    "privacidade"   =>  $c->privacidade
+                    "oid"                           =>  $c->_id->__toString(),
+                    "titulo"                        =>  $c->titulo,
+                    "conteudo"                      =>  $c->conteudo,
+                    "tags"                          =>  $c->tags,
+                    "listaCompartilhamento"         =>  $c->listaCompartilhamento,
+                    "autor"                         =>  $c->autor->__toString(),
+                    "privacidade"                   =>  $c->privacidade
                 ); 
                 
             }
@@ -381,7 +532,8 @@ class DB_Handler{
                     'nome' => $user->getName(),
                     'email' => $user->getEmail(),
                     'senha' => $pass,
-                    'funcao' => $user->getRole()
+                    'funcao' => $user->getRole()/*,
+                    'materiaisCompartilhados' => array()*/
                 ]
             );
 
@@ -526,7 +678,7 @@ class DB_Handler{
 
             $document = $collection->findOne(
                 [
-                    'email' => $user->getEmail()
+                    'email' => (string) $user->getEmail()
                 ]
             );
 

@@ -119,10 +119,12 @@
                         <div class="card-header">
                             <strong class="card-title"><a class="title_links" href="#" onclick="view_material(1,'<?php echo $m->_id; ?>');" ><?php echo $m->titulo ?></a>
                                 <small>
-                                    <?php if($m->privacidade == '0'){ ?>
-                                        <span class="badge badge-success float-right mt-1">Público</span>
-                                    <?php }else{ ?>
-                                        <span class="badge badge-dark float-right mt-1">Privado</span>
+                                    <?php if($m->privacidade == 'publico'){ ?>
+                                        <span class="badge badge-publico float-right mt-1">Público</span>
+                                    <?php }else if($m->privacidade == 'privado'){ ?>
+                                        <span class="badge badge-privado float-right mt-1">Privado</span>
+                                    <?php }else if($m->privacidade == 'restrito'){ ?>
+                                        <span class="badge badge-restrito float-right mt-1">Restrito</span>
                                     <?php } ?>
                                 </small>
                             </strong>                                    

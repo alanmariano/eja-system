@@ -79,30 +79,40 @@
                                 <div class="col-12 col-md-9"><input type="text" id="title" name="title" placeholder="Título" class="form-control"><small class="form-text text-muted">Insira o título de seu material</small></div>
                             </div>
                             <div class="row form-group">
-                                <div class="col col-md-3"><label class=" form-control-label">Material privado</label></div>
+                                <div class="col col-md-3"><label class=" form-control-label">Privacidade</label></div>
                                 <div class="col col-md-9">
                                     <div class="form-check">
                                         <div class="radio">
-                                            <label for="radioSim" class="form-check-label ">
-                                                <input type="radio" id="radioSim" name="privacy" value="1" class="form-check-input">Sim
+                                            <label for="radioPublico" class="form-check-label ">
+                                                <input type="radio" id="radioPublico" name="privacy" value="publico" onClick="radioClick(this);" class="form-check-input" checked="true">Público
                                             </label>
                                         </div>
                                         <div class="radio">
-                                            <label for="radioNao" class="form-check-label ">
-                                                <input type="radio" id="radioNao" checked="true" name="privacy" value="0" class="form-check-input">Não
+                                            <label for="radioPrivado" class="form-check-label ">
+                                                <input type="radio" id="radioPrivado" name="privacy" value="privado" onClick="radioClick(this);" class="form-check-input">Privado
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label for="radioRestrito" class="form-check-label ">
+                                                <input type="radio" id="radioRestrito" name="privacy" value="restrito" onClick="radioClick(this);" class="form-check-input">Restrito
                                             </label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="row form-group">
-                                <div class="col col-md-3"><label for="textarea-input" class=" form-control-label">Tags</label></div>
+                                <div class="col col-md-3"><label for="shareList" class=" form-control-label">Compartilhar com</label></div>
+                                <div class="col-12 col-md-9"><input type="text" id="shareList" name="shareList" placeholder="Compartilhar com" ><small class="form-text text-muted">Insira os emails dos usuários que poderão acessar o material</small></div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col col-md-3"><label for="textarea-input" class="form-control-label">Tags</label></div>
                                 <div class="col-12 col-md-9">
-                                    <input type="text" id="select-tags"/>
+                                    <input type="text" id="select-tags" />
+                                    <small class="form-text text-muted">Insira as tags do material para facilitar a pesquisa</small>
                                 </div>
                             </div>
                             <div class="row form-group">
-                                <div class="col col-md-3"><label for="textarea-input" class=" form-control-label">Conteúdo</label></div>
+                                <div class="col col-md-3"><label for="textarea-input" class="form-control-label">Conteúdo</label></div>
                                 <div class="col-12 col-md-9">
                                     <textarea id="editor">
                                     </textarea>
@@ -133,16 +143,16 @@
 
         var notyf = new Notyf();
         var selectizeNew;
+        var selectizeShareList;
 
         function submitForm() {
-
-            var array_tags = selectizeNew[0].selectize.items;
 
             var data = {
                 func: "new_material",
                 title: document.getElementById("title").value,
                 privacy: document.querySelector('input[name="privacy"]:checked').value,
-                tags: array_tags,
+                tags: selectizeNew[0].selectize.items,
+                shareList: selectizeShareList[0].selectize.items,
                 content: CKEDITOR.instances.editor.getData()
             };
 
@@ -163,10 +173,17 @@
             
         }
 
-        ( function ( $ ) {
-            "use strict";
+        function radioClick(element){
+            if(element.value=="restrito"){
+                selectizeShareList[0].selectize.enable();
+            }else{
+                selectizeShareList[0].selectize.disable();
+            }
+        }
 
-            
+
+        ( function ( $ ) {
+            "use strict";            
            
             $(document).ready(function() {
 
@@ -188,7 +205,31 @@
                     }
                 });
 
+                var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
+                  '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
+
+                selectizeShareList = $('#shareList').selectize({
+                    delimiter: ',',
+                    persist: false,
+                    create: function(input) {
+                        if ((new RegExp('^' + REGEX_EMAIL + '$', 'i')).test(input)) {
+                            return {
+                                value: input,
+                                text:input
+                                };
+                        }                        
+                        notyf.alert("Email inválido");
+                        return false;
+                    },
+                    render: {
+                        option_create: function (data, escape) {
+                            return '<div class="create">Adicionar <strong>' + escape(data.input) + '</strong>&hellip;</div>';
+                        }
+                    }
+                });
+
                 
+                selectizeShareList[0].selectize.disable();
 
             });
            

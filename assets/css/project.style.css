@@ -12,3 +12,27 @@
 .images-result-selected{
     border: 5px solid #38db2d !important;
 }
+
+.selectize-control.cke_dialog_ui_input_text.multi > .selectize-input.items.not-full{
+    width: -moz-available !important;
+    border: 1px solid #bcbcbc;
+}
+
+.selectize-control.cke_dialog_ui_input_text.multi > .selectize-input.items.not-full > input{
+    height: 25px;
+}
+
+.badge-publico {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.badge-privado {
+    color: #fff;
+    background-color: #343a40;
+}
+
+.badge-restrito {
+    color: #fff;
+    background-color: #14569e;
+}
