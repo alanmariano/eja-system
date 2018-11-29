@@ -56,7 +56,7 @@
         <div class="col-sm-4">
             <div class="page-header float-left">
                 <div class="page-title">
-                    <h1>Resultado da pesquisa: <?php echo $_POST["search_input"]; ?></h1>
+                    <h1>Materiais compartilhados comigo</h1>
                 </div>
             </div>
         </div>
@@ -94,7 +94,10 @@
 
                 <div class="card" data-id="<?php echo $m["oid"]; ?>">
                     <div class="card-header">
-                        <strong class="card-title"><a class="title_links" href="view_material.php?o=1&i=<?php echo $m["oid"]; ?>" > <?php echo $m["titulo"] ?></a>    
+                        <strong class="card-title"><a class="title_links" href="view_material.php?o=0&i=<?php echo $m["oid"]; ?>" > <?php echo $m["titulo"] ?></a>    
+                            <small>
+                                <span class="badge float-right mt-1"><?php echo $m['emailAutor']; ?></span>
+                            </small>
                         </strong>                                    
                     </div>
                     <div class="card-body">

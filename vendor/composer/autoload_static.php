@@ -11,6 +11,10 @@ class ComposerStaticInitd7e693f8738332a386c709eda22ef6ee
     );
 
     public static $prefixLengthsPsr4 = array (
+        't' => 
+        array (
+            'thiagoalessio\\TesseractOCR\\' => 27,
+        ),
         'M' => 
         array (
             'MongoDB\\' => 8,
@@ -18,6 +22,10 @@ class ComposerStaticInitd7e693f8738332a386c709eda22ef6ee
     );
 
     public static $prefixDirsPsr4 = array (
+        'thiagoalessio\\TesseractOCR\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/thiagoalessio/tesseract_ocr/src',
+        ),
         'MongoDB\\' => 
         array (
             0 => __DIR__ . '/..' . '/mongodb/mongodb/src',

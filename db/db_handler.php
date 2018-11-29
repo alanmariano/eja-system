@@ -332,7 +332,16 @@ class DB_Handler{
                     ]
                 );
 
+                
+                $collection = $this->client->$db->usuarios;
+
                 foreach($cursor as $c){
+
+                    $owner = $collection->findOne(
+                        [
+                            '_id' => $c->autor
+                        ]
+                    );
 
                     $response[] = array(
                         "oid"                           =>  $c->_id->__toString(),
@@ -341,6 +350,7 @@ class DB_Handler{
                         "tags"                          =>  $c->tags,
                         "listaCompartilhamento"         =>  $c->listaCompartilhamento,
                         "autor"                         =>  $c->autor->__toString(),
+                        "emailAutor"                    =>  $owner->email,
                         "privacidade"                   =>  $c->privacidade
                     ); 
                     
@@ -544,7 +554,7 @@ class DB_Handler{
             }
 
         }catch(Exception $e){
-            return array("status" => "error", "message" => "Erro ao inserir usuário. Erro: ".$e->getMessage());
+            return array("status" => "error", "code" => $e->getCode(), "message" => "Erro ao inserir usuário. Erro: ".$e->getMessage());
         }    
     }
 

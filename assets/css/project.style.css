@@ -14,7 +14,7 @@
 }
 
 .selectize-control.cke_dialog_ui_input_text.multi > .selectize-input.items.not-full{
-    width: -moz-available !important;
+    width: 100% !important;
     border: 1px solid #bcbcbc;
 }
 

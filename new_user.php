@@ -150,7 +150,10 @@
                     notyf.confirm('O usuário foi cadastrado com sucesso!');
                     window.scrollTo(0, 0);
                 }else{
-                    notyf.alert(response.message);
+                    if(response.code == 11000){ 
+                        notyf.alert("Já existe um usuário cadastrado com esse email.");
+                    }
+                    console.log(response.message);
                 }
                 console.log(response);
             }, json );
